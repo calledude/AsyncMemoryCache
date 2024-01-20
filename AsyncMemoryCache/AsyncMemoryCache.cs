@@ -21,12 +21,15 @@ public sealed class AsyncMemoryCache<T> : IAsyncDisposable, IAsyncMemoryCache<T>
 	public Action<string, T>? CacheItemExpired { get; init; }
 
 	internal ConcurrentDictionary<string, CacheEntity<T>> Cache { get; }
+
 	private readonly IEvictionBehavior _evictionBehavior;
 
-	public AsyncMemoryCache(IEvictionBehavior? evictionBehavior = null)
+	public AsyncMemoryCache(AsyncMemoryCacheConfiguration<T> configuration)
 	{
 		Cache = [];
-		_evictionBehavior = evictionBehavior ?? EvictionBehavior.Default;
+
+		_evictionBehavior = configuration.EvictionBehavior;
+		CacheItemExpired = configuration.CacheItemExpired;
 
 		var weakRef = new WeakReference<AsyncMemoryCache<T>>(this);
 		_evictionBehavior.Start(weakRef);
