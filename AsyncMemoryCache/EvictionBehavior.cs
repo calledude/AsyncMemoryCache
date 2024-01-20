@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -83,6 +84,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 	}
 }
 
+[ExcludeFromCodeCoverage(Justification = "Nothing to test")]
 internal sealed class NoOpEvictionBehavior : IEvictionBehavior
 {
 	public void Start<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable { }
