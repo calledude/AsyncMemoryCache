@@ -24,9 +24,7 @@ public sealed class AsyncMemoryCache<T> : IAsyncDisposable, IAsyncMemoryCache<T>
 		Cache = [];
 
 		_evictionBehavior = configuration.EvictionBehavior;
-
-		var weakRef = new WeakReference<AsyncMemoryCache<T>>(this);
-		_evictionBehavior.Start(weakRef, configuration);
+		_evictionBehavior.Start(Cache, configuration);
 	}
 
 	public AsyncLazy<T> this[string key] => Cache[key].ObjectFactory;

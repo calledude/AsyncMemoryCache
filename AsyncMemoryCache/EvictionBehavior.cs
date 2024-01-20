@@ -13,7 +13,7 @@ public static class EvictionBehavior
 
 public interface IEvictionBehavior : IAsyncDisposable
 {
-	void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable;
+	void Start<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable;
 }
 
 public sealed class DefaultEvictionBehavior : IEvictionBehavior
@@ -29,13 +29,13 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		_cts = new CancellationTokenSource();
 	}
 
-	public void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable
+	public void Start<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable
 	{
 		_workerTask = Task.Factory.StartNew(async () =>
 		{
 			try
 			{
-				while (await _timer!.WaitForNextTickAsync(_cts.Token) && !_cts.IsCancellationRequested && cacheRef.TryGetTarget(out var cache))
+				while (await _timer!.WaitForNextTickAsync(_cts.Token) && !_cts.IsCancellationRequested)
 				{
 					await CheckExpiredItems(cache, configuration);
 				}
@@ -46,11 +46,11 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		}, TaskCreationOptions.LongRunning);
 	}
 
-	private static async Task CheckExpiredItems<T>(AsyncMemoryCache<T> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable
+	private static async Task CheckExpiredItems<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable
 	{
 		var expiredItems = new List<CacheEntity<T>>();
 
-		foreach (var item in cache.Cache.Values)
+		foreach (var item in cache.Values)
 		{
 			if (DateTime.UtcNow - item.Created > item.Lifetime)
 			{
@@ -61,7 +61,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		foreach (var expiredItem in expiredItems)
 		{
 			var item = await expiredItem.ObjectFactory;
-			if (cache.Cache.TryRemove(expiredItem.Key, out _) && configuration.CacheItemExpired is not null)
+			if (cache.Remove(expiredItem.Key) && configuration.CacheItemExpired is not null)
 			{
 				configuration.CacheItemExpired.Invoke(expiredItem.Key, item);
 			}
@@ -85,6 +85,6 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 
 internal sealed class NoOpEvictionBehavior : IEvictionBehavior
 {
-	public void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable { }
+	public void Start<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable { }
 	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
