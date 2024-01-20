@@ -20,7 +20,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 {
 	private readonly PeriodicTimer _timer;
 	private readonly CancellationTokenSource _cts;
-	private Task<Task>? _workerTask;
+	private Task? _workerTask;
 
 	public DefaultEvictionBehavior(TimeProvider? timeProvider = default, TimeSpan? evictionCheckInterval = default)
 	{
@@ -43,7 +43,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 			catch (OperationCanceledException)
 			{
 			}
-		}, TaskCreationOptions.LongRunning);
+		}, TaskCreationOptions.LongRunning).Unwrap();
 	}
 
 	private static async Task CheckExpiredItems<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable
