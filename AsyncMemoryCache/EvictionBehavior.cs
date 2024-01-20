@@ -5,16 +5,18 @@ using System.Threading.Tasks;
 
 namespace AsyncMemoryCache;
 
-public abstract class EvictionBehavior : IAsyncDisposable
+public static class EvictionBehavior
 {
-	public static readonly EvictionBehavior Default = new DefaultEvictionBehavior(TimeProvider.System);
-	public static readonly EvictionBehavior Disabled = new NoOpEvictionBehavior();
-
-	public abstract ValueTask DisposeAsync();
-	internal abstract void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef) where T : IAsyncDisposable;
+	public static readonly IEvictionBehavior Default = new DefaultEvictionBehavior(TimeProvider.System);
+	public static readonly IEvictionBehavior Disabled = new NoOpEvictionBehavior();
 }
 
-public sealed class DefaultEvictionBehavior : EvictionBehavior
+public interface IEvictionBehavior : IAsyncDisposable
+{
+	void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef) where T : IAsyncDisposable;
+}
+
+public sealed class DefaultEvictionBehavior : IEvictionBehavior
 {
 	private readonly PeriodicTimer _timer;
 	private readonly CancellationTokenSource _cts;
@@ -27,7 +29,7 @@ public sealed class DefaultEvictionBehavior : EvictionBehavior
 		_cts = new CancellationTokenSource();
 	}
 
-	internal override void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef)
+	public void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef) where T : IAsyncDisposable
 	{
 		_workerTask = Task.Factory.StartNew(async () =>
 		{
@@ -68,7 +70,7 @@ public sealed class DefaultEvictionBehavior : EvictionBehavior
 		}
 	}
 
-	public override async ValueTask DisposeAsync()
+	public async ValueTask DisposeAsync()
 	{
 		_cts.Cancel();
 
@@ -81,8 +83,8 @@ public sealed class DefaultEvictionBehavior : EvictionBehavior
 	}
 }
 
-internal sealed class NoOpEvictionBehavior : EvictionBehavior
+internal sealed class NoOpEvictionBehavior : IEvictionBehavior
 {
-	internal override void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef) { }
-	public override ValueTask DisposeAsync() => ValueTask.CompletedTask;
+	public void Start<T>(WeakReference<AsyncMemoryCache<T>> cacheRef) where T : IAsyncDisposable { }
+	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

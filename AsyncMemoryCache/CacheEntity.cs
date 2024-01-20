@@ -4,7 +4,14 @@ using System.Threading.Tasks;
 
 namespace AsyncMemoryCache;
 
-public sealed class CacheEntity<T> where T : IAsyncDisposable
+public interface ICacheEntity<T> where T : IAsyncDisposable
+{
+	string Key { get; }
+	TimeSpan Lifetime { get; set; }
+	AsyncLazy<T> ObjectFactory { get; }
+}
+
+public sealed class CacheEntity<T> : ICacheEntity<T> where T : IAsyncDisposable
 {
 	public CacheEntity(string key, Func<Task<T>> objectFactory, AsyncLazyFlags lazyFlags)
 	{
