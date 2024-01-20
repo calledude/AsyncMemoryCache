@@ -50,7 +50,7 @@ public sealed class DefaultEvictionBehavior : EvictionBehavior
 
 		foreach (var item in cache.Cache.Values)
 		{
-			if (DateTime.UtcNow - item.Created > cache.CacheItemLifeTime)
+			if (DateTime.UtcNow - item.Created > item.Lifetime)
 			{
 				expiredItems.Add(item);
 			}

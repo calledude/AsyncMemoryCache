@@ -8,15 +8,13 @@ namespace AsyncMemoryCache;
 public sealed class AsyncMemoryCache<T> : IAsyncDisposable where T : IAsyncDisposable
 {
 	internal readonly ConcurrentDictionary<string, CacheEntity<T>> Cache;
-	internal readonly TimeSpan CacheItemLifeTime;
 	private readonly EvictionBehavior _evictionBehavior;
 
 	public Action<string, T>? CacheItemExpired { get; init; }
 
-	public AsyncMemoryCache(EvictionBehavior? evictionBehavior = null, TimeSpan? lifeTime = default)
+	public AsyncMemoryCache(EvictionBehavior? evictionBehavior = null)
 	{
 		Cache = [];
-		CacheItemLifeTime = lifeTime ?? TimeSpan.FromMinutes(30);
 		_evictionBehavior = evictionBehavior ?? EvictionBehavior.Default;
 
 		var weakRef = new WeakReference<AsyncMemoryCache<T>>(this);
@@ -25,14 +23,16 @@ public sealed class AsyncMemoryCache<T> : IAsyncDisposable where T : IAsyncDispo
 
 	public AsyncLazy<T> this[string key] => Cache[key].ObjectFactory;
 
-	public void Add(string key, Func<Task<T>> entity)
+	public CacheEntity<T> Add(string key, Func<Task<T>> objectFactory)
 	{
-		if (Cache.ContainsKey(key))
-			return;
+		if (Cache.TryGetValue(key, out var entity))
+			return entity;
 
-		var cacheEntity = new CacheEntity<T>(key, entity);
+		var cacheEntity = new CacheEntity<T>(key, objectFactory);
 		cacheEntity.ObjectFactory.Start();
 		Cache[key] = cacheEntity;
+
+		return cacheEntity;
 	}
 
 	public bool ContainsKey(string key) => Cache.ContainsKey(key);
