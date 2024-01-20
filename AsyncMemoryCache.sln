@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncMemoryCache", "AsyncMemoryCache\AsyncMemoryCache.csproj", "{811823CF-34AF-41C7-B9A2-90C314B8734D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{811823CF-34AF-41C7-B9A2-90C314B8734D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{811823CF-34AF-41C7-B9A2-90C314B8734D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{811823CF-34AF-41C7-B9A2-90C314B8734D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{811823CF-34AF-41C7-B9A2-90C314B8734D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F68B2F91-70ED-4912-82DC-B5F4DA4A32EB}
+	EndGlobalSection
+EndGlobal
