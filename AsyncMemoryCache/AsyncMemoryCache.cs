@@ -18,10 +18,10 @@ public interface IAsyncMemoryCache<T> where T : IAsyncDisposable
 
 public sealed class AsyncMemoryCache<T> : IAsyncDisposable, IAsyncMemoryCache<T> where T : IAsyncDisposable
 {
-	internal readonly ConcurrentDictionary<string, CacheEntity<T>> Cache;
-	private readonly IEvictionBehavior _evictionBehavior;
-
 	public Action<string, T>? CacheItemExpired { get; init; }
+
+	internal ConcurrentDictionary<string, CacheEntity<T>> Cache { get; }
+	private readonly IEvictionBehavior _evictionBehavior;
 
 	public AsyncMemoryCache(IEvictionBehavior? evictionBehavior = null)
 	{
