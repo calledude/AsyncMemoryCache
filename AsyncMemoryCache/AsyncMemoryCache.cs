@@ -23,12 +23,12 @@ public sealed class AsyncMemoryCache<T> : IAsyncDisposable where T : IAsyncDispo
 
 	public AsyncLazy<T> this[string key] => Cache[key].ObjectFactory;
 
-	public CacheEntity<T> Add(string key, Func<Task<T>> objectFactory)
+	public CacheEntity<T> Add(string key, Func<Task<T>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
 	{
 		if (Cache.TryGetValue(key, out var entity))
 			return entity;
 
-		var cacheEntity = new CacheEntity<T>(key, objectFactory);
+		var cacheEntity = new CacheEntity<T>(key, objectFactory, lazyFlags);
 		cacheEntity.ObjectFactory.Start();
 		Cache[key] = cacheEntity;
 

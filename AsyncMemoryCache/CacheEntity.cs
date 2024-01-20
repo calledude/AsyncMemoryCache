@@ -6,12 +6,10 @@ namespace AsyncMemoryCache;
 
 public sealed class CacheEntity<T> where T : IAsyncDisposable
 {
-	public CacheEntity(string key, Func<Task<T>> objectFactory)
+	public CacheEntity(string key, Func<Task<T>> objectFactory, AsyncLazyFlags lazyFlags)
 	{
-		// TODO: Configurable lazy flags?
-
 		Key = key;
-		ObjectFactory = new AsyncLazy<T>(objectFactory, AsyncLazyFlags.None);
+		ObjectFactory = new AsyncLazy<T>(objectFactory, lazyFlags);
 	}
 
 	internal DateTime Created { get; } = DateTime.UtcNow;
