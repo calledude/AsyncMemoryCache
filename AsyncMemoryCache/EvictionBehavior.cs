@@ -44,7 +44,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 			catch (OperationCanceledException)
 			{
 			}
-		}, TaskCreationOptions.LongRunning).Unwrap();
+		}, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
 	}
 
 	private static async Task CheckExpiredItems<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration) where T : IAsyncDisposable
@@ -73,6 +73,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 
 	public async ValueTask DisposeAsync()
 	{
+		_timer.Dispose();
 		_cts.Cancel();
 
 		if (_workerTask is not null)
