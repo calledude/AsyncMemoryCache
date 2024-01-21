@@ -10,7 +10,6 @@ public interface IAsyncMemoryCache<T> where T : IAsyncDisposable
 	AsyncLazy<T> this[string key] { get; }
 	ICacheEntity<T> Add(string key, Func<Task<T>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
 	bool ContainsKey(string key);
-	ValueTask DisposeAsync();
 }
 
 public sealed class AsyncMemoryCache<T> : IAsyncDisposable, IAsyncMemoryCache<T> where T : IAsyncDisposable
