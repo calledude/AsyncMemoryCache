@@ -1,5 +1,6 @@
-﻿using System;
-using static AsyncMemoryCache.EvictionBehavior;
+﻿using AsyncMemoryCache.EvictionBehaviors;
+using System;
+using static AsyncMemoryCache.EvictionBehaviors.EvictionBehavior;
 
 namespace AsyncMemoryCache;
 

@@ -1,3 +1,4 @@
+using AsyncMemoryCache.EvictionBehaviors;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
@@ -22,11 +23,11 @@ public class AsyncMemoryCacheTests
 
 		var semaphore = new SemaphoreSlim(0, 1);
 
-		Task<IAsyncDisposable> factory()
+		var factory = () =>
 		{
 			semaphore.Wait();
 			return Task.FromResult(Substitute.For<IAsyncDisposable>());
-		}
+		};
 
 		ICacheEntity<IAsyncDisposable>? entity = null;
 		var ex = await Record.ExceptionAsync(() => Task.Run(() => entity = target.Add("test", factory)).WaitAsync(TimeSpan.FromMilliseconds(500)));
