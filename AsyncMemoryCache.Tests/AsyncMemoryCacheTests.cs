@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
@@ -90,7 +91,12 @@ public class AsyncMemoryCacheTests
 
 		_ = new AsyncMemoryCache<IAsyncDisposable>(config);
 
-		evictionBehavior.Received(1).Start(Arg.Any<IDictionary<string, CacheEntity<IAsyncDisposable>>>(), config);
+		evictionBehavior
+			.Received(1)
+			.Start(
+				Arg.Any<IDictionary<string, CacheEntity<IAsyncDisposable>>>(),
+				config,
+				Arg.Any<ILogger<AsyncMemoryCache<IAsyncDisposable>>>());
 	}
 
 	[Fact]

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Time.Testing;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Nito.AsyncEx;
 using NSubstitute;
 using NSubstitute.Extensions;
@@ -12,6 +14,8 @@ namespace AsyncMemoryCache.Tests;
 
 public class EvictionBehaviorTests
 {
+	private static readonly ILogger<AsyncMemoryCache<IAsyncDisposable>> _logger = NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<IAsyncDisposable>>();
+
 	[Theory]
 	[InlineData(null, 30)]
 	[InlineData(5, 5)]
@@ -35,7 +39,7 @@ public class EvictionBehaviorTests
 			: null;
 
 		var target = new DefaultEvictionBehavior(timeProvider, interval);
-		target.Start(cache, config);
+		target.Start(cache, config, _logger);
 
 		timeProvider.Advance(TimeSpan.FromSeconds(expectedTickInterval - 0.1));
 
@@ -94,7 +98,7 @@ public class EvictionBehaviorTests
 			}
 		};
 
-		target.Start(cache, config);
+		target.Start(cache, config, _logger);
 
 		timeProvider.Advance(TimeSpan.FromSeconds(30));
 
@@ -124,7 +128,7 @@ public class EvictionBehaviorTests
 
 		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>();
 		var target = new DefaultEvictionBehavior(null, TimeSpan.FromMilliseconds(1));
-		target.Start(cache, config);
+		target.Start(cache, config, _logger);
 
 		_ = resetEvent.WaitOne();
 		await target.DisposeAsync();
@@ -161,7 +165,7 @@ public class EvictionBehaviorTests
 			CacheItemExpired = null
 		};
 
-		target.Start(cache, config);
+		target.Start(cache, config, _logger);
 
 		timeProvider.Advance(TimeSpan.FromSeconds(30));
 
