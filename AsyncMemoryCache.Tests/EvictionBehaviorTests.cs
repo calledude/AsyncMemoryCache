@@ -111,4 +111,63 @@ public class EvictionBehaviorTests
 		await expiredCacheObject.Received(1).DisposeAsync();
 		await notExpiredCacheObject.DidNotReceive().DisposeAsync();
 	}
+
+	[Fact]
+	public async Task UseSystemTimer()
+	{
+		var resetEvent = new ManualResetEvent(false);
+		var cache = Substitute.For<IDictionary<string, CacheEntity<IAsyncDisposable>>>();
+		_ = cache.Configure()
+			.Values
+			.Returns([])
+			.AndDoes(_ => resetEvent.Set());
+
+		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>();
+		var target = new DefaultEvictionBehavior(null, TimeSpan.FromMilliseconds(1));
+		target.Start(cache, config);
+
+		_ = resetEvent.WaitOne();
+		await target.DisposeAsync();
+
+		_ = cache.Received().Values;
+	}
+
+	[Fact]
+	public async Task ExpiredCacheItemIsAlwaysDisposed()
+	{
+		var expiredCacheObject = Substitute.For<IAsyncDisposable>();
+
+		const string expiredKey = "expired";
+
+		var resetEvent = new ManualResetEvent(false);
+		var cache = Substitute.For<IDictionary<string, CacheEntity<IAsyncDisposable>>>();
+		_ = cache.Configure()
+			.Values
+			.Returns(
+			[
+				new CacheEntity<IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
+				{
+					Lifetime = TimeSpan.FromTicks(1)
+				}
+			])
+			.AndDoes(_ => resetEvent.Set());
+
+		_ = cache.Remove(expiredKey).Returns(false);
+
+		var timeProvider = new FakeTimeProvider(DateTime.UtcNow);
+		var target = new DefaultEvictionBehavior(timeProvider);
+		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
+		{
+			CacheItemExpired = null
+		};
+
+		target.Start(cache, config);
+
+		timeProvider.Advance(TimeSpan.FromSeconds(30));
+
+		_ = resetEvent.WaitOne();
+		await target.DisposeAsync();
+
+		await expiredCacheObject.Received(1).DisposeAsync();
+	}
 }
