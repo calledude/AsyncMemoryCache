@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 
 namespace AsyncMemoryCache.EvictionBehaviors;
 
@@ -12,5 +11,5 @@ public static class EvictionBehavior
 
 public interface IEvictionBehavior : IAsyncDisposable
 {
-	void Start<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>> logger) where T : IAsyncDisposable;
+	void Start<T>(AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>> logger) where T : IAsyncDisposable;
 }

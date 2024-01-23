@@ -2,7 +2,6 @@ using AsyncMemoryCache.EvictionBehaviors;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,15 +10,11 @@ namespace AsyncMemoryCache.Tests;
 
 public class AsyncMemoryCacheTests
 {
-	private static readonly AsyncMemoryCacheConfiguration<IAsyncDisposable> _configuration = new()
-	{
-		EvictionBehavior = EvictionBehavior.Disabled
-	};
-
 	[Fact]
 	public async Task FactoryIsInvoked_DoesNotBlock()
 	{
-		var target = new AsyncMemoryCache<IAsyncDisposable>(_configuration);
+		var configuration = CreateConfiguration();
+		var target = new AsyncMemoryCache<IAsyncDisposable>(configuration);
 
 		var semaphore = new SemaphoreSlim(0, 1);
 
@@ -40,7 +35,8 @@ public class AsyncMemoryCacheTests
 	[Fact]
 	public async Task Add_ObjectIsReturnedInCacheEntity()
 	{
-		var target = new AsyncMemoryCache<IAsyncDisposable>(_configuration);
+		var configuration = CreateConfiguration();
+		var target = new AsyncMemoryCache<IAsyncDisposable>(configuration);
 
 		var objectToCache = Substitute.For<IAsyncDisposable>();
 		var factory = () => Task.FromResult(objectToCache);
@@ -54,7 +50,8 @@ public class AsyncMemoryCacheTests
 	[Fact]
 	public async Task Add_ObjectIsReturnedFromIndexer()
 	{
-		var target = new AsyncMemoryCache<IAsyncDisposable>(_configuration);
+		var configuration = CreateConfiguration();
+		var target = new AsyncMemoryCache<IAsyncDisposable>(configuration);
 
 		var objectToCache = Substitute.For<IAsyncDisposable>();
 		var factory = () => Task.FromResult(objectToCache);
@@ -69,7 +66,8 @@ public class AsyncMemoryCacheTests
 	[Fact]
 	public void Add_CalledTwice_ReturnsPreviousCacheEntity()
 	{
-		var target = new AsyncMemoryCache<IAsyncDisposable>(_configuration);
+		var configuration = CreateConfiguration();
+		var target = new AsyncMemoryCache<IAsyncDisposable>(configuration);
 
 		var factory = () => Task.FromResult(Substitute.For<IAsyncDisposable>());
 
@@ -95,7 +93,6 @@ public class AsyncMemoryCacheTests
 		evictionBehavior
 			.Received(1)
 			.Start(
-				Arg.Any<IDictionary<string, CacheEntity<IAsyncDisposable>>>(),
 				config,
 				Arg.Any<ILogger<AsyncMemoryCache<IAsyncDisposable>>>());
 	}
@@ -103,11 +100,12 @@ public class AsyncMemoryCacheTests
 	[Fact]
 	public void ContainsKey()
 	{
-		var target = new AsyncMemoryCache<IAsyncDisposable>(_configuration);
+		var configuration = CreateConfiguration();
+		var target = new AsyncMemoryCache<IAsyncDisposable>(configuration);
 
 		var factory = () => Task.FromResult(Substitute.For<IAsyncDisposable>());
 
-		const string cacheKey = "test";
+		const string cacheKey = "test1";
 		_ = target.Add(cacheKey, factory);
 
 		Assert.True(target.ContainsKey(cacheKey));
@@ -126,5 +124,13 @@ public class AsyncMemoryCacheTests
 		await target.DisposeAsync();
 
 		await evictionBehavior.Received().DisposeAsync();
+	}
+
+	private static AsyncMemoryCacheConfiguration<IAsyncDisposable> CreateConfiguration()
+	{
+		return new()
+		{
+			EvictionBehavior = EvictionBehavior.Disabled
+		};
 	}
 }

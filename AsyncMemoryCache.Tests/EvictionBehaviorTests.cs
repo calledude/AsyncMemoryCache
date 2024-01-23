@@ -24,14 +24,18 @@ public class EvictionBehaviorTests
 	[InlineData(900, 900)]
 	public void DefaultEvictionBehavior_TicksAccordingToConfig(int? seconds, int expectedTickInterval)
 	{
-		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>();
-		var cache = Substitute.For<IDictionary<string, CacheEntity<IAsyncDisposable>>>();
-
 		var resetEvent = new ManualResetEvent(false);
+
+		var cache = Substitute.For<IDictionary<string, CacheEntity<IAsyncDisposable>>>();
 		_ = cache.Configure()
 			.Values
 			.Returns([])
 			.AndDoes(_ => resetEvent.Set());
+
+		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
+		{
+			CacheBackingStore = cache
+		};
 
 		var timeProvider = new FakeTimeProvider();
 
@@ -40,7 +44,7 @@ public class EvictionBehaviorTests
 			: null;
 
 		var target = new DefaultEvictionBehavior(timeProvider, interval);
-		target.Start(cache, config, _logger);
+		target.Start(config, _logger);
 
 		timeProvider.Advance(TimeSpan.FromSeconds(expectedTickInterval - 0.1));
 
@@ -96,10 +100,11 @@ public class EvictionBehaviorTests
 				// And as such guarantees at least one tick completion
 				await target.DisposeAsync();
 				_ = evt.Set();
-			}
+			},
+			CacheBackingStore = cache
 		};
 
-		target.Start(cache, config, _logger);
+		target.Start(config, _logger);
 
 		timeProvider.Advance(TimeSpan.FromSeconds(30));
 
@@ -127,9 +132,13 @@ public class EvictionBehaviorTests
 			.Returns([])
 			.AndDoes(_ => resetEvent.Set());
 
-		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>();
+		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
+		{
+			CacheBackingStore = cache
+		};
+
 		var target = new DefaultEvictionBehavior(null, TimeSpan.FromMilliseconds(1));
-		target.Start(cache, config, _logger);
+		target.Start(config, _logger);
 
 		_ = resetEvent.WaitOne();
 		await target.DisposeAsync();
@@ -163,10 +172,11 @@ public class EvictionBehaviorTests
 		var target = new DefaultEvictionBehavior(timeProvider);
 		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
 		{
-			CacheItemExpired = null
+			CacheItemExpired = null,
+			CacheBackingStore = cache
 		};
 
-		target.Start(cache, config, _logger);
+		target.Start(config, _logger);
 
 		timeProvider.Advance(TimeSpan.FromSeconds(30));
 

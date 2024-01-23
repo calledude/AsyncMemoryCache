@@ -19,7 +19,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		_cts = new CancellationTokenSource();
 	}
 
-	public void Start<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>> logger) where T : IAsyncDisposable
+	public void Start<T>(AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>> logger) where T : IAsyncDisposable
 	{
 		logger.LogTrace("Starting evictionbehavior - expiry check interval {interval}.", _timer.Period);
 		_workerTask = Task.Factory.StartNew(async () =>
@@ -28,7 +28,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 			{
 				while (await _timer!.WaitForNextTickAsync(_cts.Token) && !_cts.IsCancellationRequested)
 				{
-					await CheckExpiredItems(cache, configuration, logger);
+					await CheckExpiredItems(configuration, logger);
 				}
 			}
 			catch (OperationCanceledException)
@@ -40,11 +40,12 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		logger.LogTrace("Stopping behavior.");
 	}
 
-	private static async Task CheckExpiredItems<T>(IDictionary<string, CacheEntity<T>> cache, AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>> logger) where T : IAsyncDisposable
+	private static async Task CheckExpiredItems<T>(AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>> logger) where T : IAsyncDisposable
 	{
 		logger.LogTrace("Checking expired items");
 		var expiredItems = new List<CacheEntity<T>>();
 
+		var cache = configuration.CacheBackingStore;
 		foreach (var item in cache.Values)
 		{
 			if (DateTime.UtcNow - item.Created > item.Lifetime)
