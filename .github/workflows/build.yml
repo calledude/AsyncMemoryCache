@@ -1,0 +1,45 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      run: dotnet tool install -g GitVersion.Tool --version 5.*
+
+    - name: Execute GitVersion
+      id: version
+      run: dotnet-gitversion /output buildserver
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build -c Release --no-restore
+
+    - name: Pack
+      run: dotnet pack -c Release --no-build /p:PackageVersion=${{ env.GitVersion_SemVer }}
+
+    - name: Test
+      run: dotnet test -c Release --no-build --verbosity normal
+
+    - name: Push
+      if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+      run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json -k $NUGET_AUTH_TOKEN
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.NUGET_API_KEY }}
