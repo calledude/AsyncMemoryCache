@@ -1,13 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
-  </ItemGroup>
+	<PropertyGroup>
+		<PackageId>AsyncMemoryCache</PackageId>
+		<Title>AsyncMemoryCache</Title>
+		<Authors>calledude</Authors>
+		
+		<PackageProjectUrl>https://github.com/calledude/AsyncMemoryCache/</PackageProjectUrl>
+
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>asyncmemorycache async cache lazy dispose</PackageTags>
+
+		<Description>
+			AsyncMemoryCache allows you to lazily create cache entries while also making sure to dispose of them properly when evicted.
+		</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 </Project>
