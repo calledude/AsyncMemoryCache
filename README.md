@@ -33,9 +33,8 @@ var cacheEntity = cache.Add("theKey", async () =>
 	var createdObject = await ...;
 	await Task.Delay(1000);
 	return createdObject;
-});
-
-cacheEntity.Lifetime = TimeSpan.FromHours(12);
+})
+.WithSlidingExpiration(TimeSpan.FromHours(12));
 
 // Will block here until the object is created
 var theCachedObject = await cache["theKey"];

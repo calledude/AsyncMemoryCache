@@ -58,7 +58,7 @@ public class EvictionBehaviorTests
 	}
 
 	[Fact]
-	public async Task DefaultEvictionBehavior_RemovesExpiredItem_LeavesNonExpiredItems()
+	public async Task DefaultEvictionBehavior_RemovesAbsoluteExpiredItem_LeavesNonExpiredItems()
 	{
 		var notExpiredCacheObject = Substitute.For<IAsyncDisposable>();
 		var expiredCacheObject = Substitute.For<IAsyncDisposable>();
@@ -71,17 +71,55 @@ public class EvictionBehaviorTests
 			{
 				notExpiredKey, new CacheEntity<string, IAsyncDisposable>(notExpiredKey, () => Task.FromResult(notExpiredCacheObject), AsyncLazyFlags.None)
 				{
-					Lifetime = TimeSpan.FromDays(2)
+					AbsoluteExpiration = DateTimeOffset.UtcNow.AddDays(2)
 				}
 			},
 			{
 				expiredKey, new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
 				{
-					Lifetime = TimeSpan.FromTicks(1)
+					AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(-1)
 				}
 			}
 		};
 
+		await Internal_DefaultEvictionBehavior_RemovesExpiredItem_LeavesNonExpiredItems(cache, expiredKey, notExpiredKey, expiredCacheObject, notExpiredCacheObject);
+	}
+
+	[Fact]
+	public async Task DefaultEvictionBehavior_RemovesSlidingExpiredItem_LeavesNonExpiredItems()
+	{
+		var notExpiredCacheObject = Substitute.For<IAsyncDisposable>();
+		var expiredCacheObject = Substitute.For<IAsyncDisposable>();
+
+		const string expiredKey = "expired";
+		const string notExpiredKey = "notExpired";
+
+		var cache = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
+		{
+			{
+				notExpiredKey, new CacheEntity<string, IAsyncDisposable>(notExpiredKey, () => Task.FromResult(notExpiredCacheObject), AsyncLazyFlags.None)
+				{
+					SlidingExpiration = TimeSpan.FromDays(2)
+				}
+			},
+			{
+				expiredKey, new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
+				{
+					SlidingExpiration = TimeSpan.FromTicks(1)
+				}
+			}
+		};
+
+		await Internal_DefaultEvictionBehavior_RemovesExpiredItem_LeavesNonExpiredItems(cache, expiredKey, notExpiredKey, expiredCacheObject, notExpiredCacheObject);
+	}
+
+	private static async Task Internal_DefaultEvictionBehavior_RemovesExpiredItem_LeavesNonExpiredItems(
+		Dictionary<string, CacheEntity<string, IAsyncDisposable>> cache,
+		string expiredKey,
+		string notExpiredKey,
+		IAsyncDisposable expiredCacheObject,
+		IAsyncDisposable notExpiredCacheObject)
+	{
 		var timeProvider = new FakeTimeProvider(DateTime.UtcNow);
 
 		var target = new DefaultEvictionBehavior(timeProvider);
@@ -161,7 +199,7 @@ public class EvictionBehaviorTests
 			[
 				new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
 				{
-					Lifetime = TimeSpan.FromTicks(1)
+					AbsoluteExpiration = DateTimeOffset.UtcNow
 				}
 			])
 			.AndDoes(_ => resetEvent.Set());

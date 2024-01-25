@@ -34,13 +34,24 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		_evictionBehavior.Start(configuration, _logger);
 	}
 
-	public AsyncLazy<TValue> this[TKey key] => _cache[key].ObjectFactory;
+	public AsyncLazy<TValue> this[TKey key]
+	{
+		get
+		{
+			var cacheEntity = _cache[key];
+			cacheEntity.LastUse = DateTimeOffset.UtcNow;
+			return cacheEntity.ObjectFactory;
+		}
+	}
 
 	public ICacheEntity<TKey, TValue> Add(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
 	{
 		_logger.LogTrace("Adding item with key: {key}", key);
 		if (_cache.TryGetValue(key, out var entity))
+		{
+			entity.LastUse = DateTimeOffset.UtcNow;
 			return entity;
+		}
 
 		var cacheEntity = new CacheEntity<TKey, TValue>(key, objectFactory, lazyFlags);
 		cacheEntity.ObjectFactory.Start();

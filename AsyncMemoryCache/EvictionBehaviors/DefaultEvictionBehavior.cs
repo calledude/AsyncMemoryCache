@@ -52,8 +52,8 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		var cache = configuration.CacheBackingStore;
 		foreach (var item in cache.Values)
 		{
-			// TODO: Make sliding window
-			if (DateTime.UtcNow - item.Created > item.Lifetime)
+			if (DateTimeOffset.UtcNow > item.AbsoluteExpiration
+				|| DateTimeOffset.UtcNow - item.LastUse > item.SlidingExpiration)
 			{
 				expiredItems.Add(item);
 			}
