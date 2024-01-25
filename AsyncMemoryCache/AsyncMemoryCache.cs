@@ -8,37 +8,41 @@ using System.Threading.Tasks;
 
 namespace AsyncMemoryCache;
 
-public interface IAsyncMemoryCache<T> where T : IAsyncDisposable
+public interface IAsyncMemoryCache<TKey, TValue>
+	where TKey : notnull
+	where TValue : IAsyncDisposable
 {
-	AsyncLazy<T> this[string key] { get; }
-	ICacheEntity<T> Add(string key, Func<Task<T>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
-	bool ContainsKey(string key);
+	AsyncLazy<TValue> this[TKey key] { get; }
+	ICacheEntity<TKey, TValue> Add(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
+	bool ContainsKey(TKey key);
 }
 
-public sealed class AsyncMemoryCache<T> : IAsyncDisposable, IAsyncMemoryCache<T> where T : IAsyncDisposable
+public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMemoryCache<TKey, TValue>
+	where TKey : notnull
+	where TValue : IAsyncDisposable
 {
-	private readonly IDictionary<string, CacheEntity<T>> _cache;
+	private readonly IDictionary<TKey, CacheEntity<TKey, TValue>> _cache;
 	private readonly IEvictionBehavior _evictionBehavior;
-	private readonly ILogger<AsyncMemoryCache<T>> _logger;
+	private readonly ILogger<AsyncMemoryCache<TKey, TValue>> _logger;
 
-	public AsyncMemoryCache(AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>>? logger = null)
+	public AsyncMemoryCache(AsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
 	{
 		_cache = configuration.CacheBackingStore;
 
-		_logger = logger ?? NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<T>>();
+		_logger = logger ?? NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<TKey, TValue>>();
 		_evictionBehavior = configuration.EvictionBehavior;
 		_evictionBehavior.Start(configuration, _logger);
 	}
 
-	public AsyncLazy<T> this[string key] => _cache[key].ObjectFactory;
+	public AsyncLazy<TValue> this[TKey key] => _cache[key].ObjectFactory;
 
-	public ICacheEntity<T> Add(string key, Func<Task<T>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
+	public ICacheEntity<TKey, TValue> Add(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
 	{
 		_logger.LogTrace("Adding item with key: {key}", key);
 		if (_cache.TryGetValue(key, out var entity))
 			return entity;
 
-		var cacheEntity = new CacheEntity<T>(key, objectFactory, lazyFlags);
+		var cacheEntity = new CacheEntity<TKey, TValue>(key, objectFactory, lazyFlags);
 		cacheEntity.ObjectFactory.Start();
 		_cache[key] = cacheEntity;
 
@@ -46,7 +50,7 @@ public sealed class AsyncMemoryCache<T> : IAsyncDisposable, IAsyncMemoryCache<T>
 		return cacheEntity;
 	}
 
-	public bool ContainsKey(string key)
+	public bool ContainsKey(TKey key)
 		=> _cache.ContainsKey(key);
 
 	public async ValueTask DisposeAsync()

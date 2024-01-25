@@ -11,5 +11,7 @@ public static class EvictionBehavior
 
 public interface IEvictionBehavior : IAsyncDisposable
 {
-	void Start<T>(AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>> logger) where T : IAsyncDisposable;
+	void Start<TKey, TValue>(AsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>> logger)
+		where TKey : notnull
+		where TValue : IAsyncDisposable;
 }

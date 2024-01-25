@@ -8,6 +8,9 @@ namespace AsyncMemoryCache.EvictionBehaviors;
 [ExcludeFromCodeCoverage(Justification = "Nothing to test")]
 internal sealed class NoOpEvictionBehavior : IEvictionBehavior
 {
-	public void Start<T>(AsyncMemoryCacheConfiguration<T> configuration, ILogger<AsyncMemoryCache<T>>? logger) where T : IAsyncDisposable { }
+	public void Start<TKey, TValue>(AsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger)
+		where TKey : notnull
+		where TValue : IAsyncDisposable
+	{ }
 	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

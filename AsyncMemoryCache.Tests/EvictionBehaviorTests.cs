@@ -15,7 +15,7 @@ namespace AsyncMemoryCache.Tests;
 
 public class EvictionBehaviorTests
 {
-	private static readonly ILogger<AsyncMemoryCache<IAsyncDisposable>> _logger = NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<IAsyncDisposable>>();
+	private static readonly ILogger<AsyncMemoryCache<string, IAsyncDisposable>> _logger = NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<string, IAsyncDisposable>>();
 
 	[Theory]
 	[InlineData(null, 30)]
@@ -26,13 +26,13 @@ public class EvictionBehaviorTests
 	{
 		var resetEvent = new ManualResetEvent(false);
 
-		var cache = Substitute.For<IDictionary<string, CacheEntity<IAsyncDisposable>>>();
+		var cache = Substitute.For<IDictionary<string, CacheEntity<string, IAsyncDisposable>>>();
 		_ = cache.Configure()
 			.Values
 			.Returns([])
 			.AndDoes(_ => resetEvent.Set());
 
-		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			CacheBackingStore = cache
 		};
@@ -66,16 +66,16 @@ public class EvictionBehaviorTests
 		const string expiredKey = "expired";
 		const string notExpiredKey = "notExpired";
 
-		var cache = new Dictionary<string, CacheEntity<IAsyncDisposable>>
+		var cache = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
 		{
 			{
-				notExpiredKey, new CacheEntity<IAsyncDisposable>(notExpiredKey, () => Task.FromResult(notExpiredCacheObject), AsyncLazyFlags.None)
+				notExpiredKey, new CacheEntity<string, IAsyncDisposable>(notExpiredKey, () => Task.FromResult(notExpiredCacheObject), AsyncLazyFlags.None)
 				{
 					Lifetime = TimeSpan.FromDays(2)
 				}
 			},
 			{
-				expiredKey, new CacheEntity<IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
+				expiredKey, new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
 				{
 					Lifetime = TimeSpan.FromTicks(1)
 				}
@@ -89,7 +89,7 @@ public class EvictionBehaviorTests
 		var evt = new ManualResetEvent(false);
 
 		var expiredCacheItems = new Dictionary<string, IAsyncDisposable>();
-		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			CacheItemExpired = async (s, item) =>
 			{
@@ -126,13 +126,13 @@ public class EvictionBehaviorTests
 	public async Task UseSystemTimer()
 	{
 		var resetEvent = new ManualResetEvent(false);
-		var cache = Substitute.For<IDictionary<string, CacheEntity<IAsyncDisposable>>>();
+		var cache = Substitute.For<IDictionary<string, CacheEntity<string, IAsyncDisposable>>>();
 		_ = cache.Configure()
 			.Values
 			.Returns([])
 			.AndDoes(_ => resetEvent.Set());
 
-		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			CacheBackingStore = cache
 		};
@@ -154,12 +154,12 @@ public class EvictionBehaviorTests
 		const string expiredKey = "expired";
 
 		var resetEvent = new ManualResetEvent(false);
-		var cache = Substitute.For<IDictionary<string, CacheEntity<IAsyncDisposable>>>();
+		var cache = Substitute.For<IDictionary<string, CacheEntity<string, IAsyncDisposable>>>();
 		_ = cache.Configure()
 			.Values
 			.Returns(
 			[
-				new CacheEntity<IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
+				new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
 				{
 					Lifetime = TimeSpan.FromTicks(1)
 				}
@@ -170,7 +170,7 @@ public class EvictionBehaviorTests
 
 		var timeProvider = new FakeTimeProvider(DateTime.UtcNow);
 		var target = new DefaultEvictionBehavior(timeProvider);
-		var config = new AsyncMemoryCacheConfiguration<IAsyncDisposable>
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			CacheItemExpired = null,
 			CacheBackingStore = cache

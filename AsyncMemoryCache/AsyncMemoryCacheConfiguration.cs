@@ -6,9 +6,11 @@ using static AsyncMemoryCache.EvictionBehaviors.EvictionBehavior;
 
 namespace AsyncMemoryCache;
 
-public sealed class AsyncMemoryCacheConfiguration<T> where T : IAsyncDisposable
+public sealed class AsyncMemoryCacheConfiguration<TKey, TValue>
+	where TKey : notnull
+	where TValue : IAsyncDisposable
 {
-	public Action<string, T>? CacheItemExpired { get; init; }
+	public Action<TKey, TValue>? CacheItemExpired { get; init; }
 	public IEvictionBehavior EvictionBehavior { get; init; } = Default;
-	public IDictionary<string, CacheEntity<T>> CacheBackingStore { get; init; } = new ConcurrentDictionary<string, CacheEntity<T>>();
+	public IDictionary<TKey, CacheEntity<TKey, TValue>> CacheBackingStore { get; init; } = new ConcurrentDictionary<TKey, CacheEntity<TKey, TValue>>();
 }

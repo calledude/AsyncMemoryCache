@@ -11,13 +11,13 @@ public class ExtensionsTests
 	[Fact]
 	public void CanResolveAsyncMemoryCacheWithLogger()
 	{
-		var logger = NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<IAsyncDisposable>>();
+		var logger = NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<string, IAsyncDisposable>>();
 		var serviceProvider = new ServiceCollection()
 			.AddAsyncMemoryCache()
 			.AddSingleton(logger)
 			.BuildServiceProvider();
 
-		var asyncMemoryCache = serviceProvider.GetService<IAsyncMemoryCache<IAsyncDisposable>>();
+		var asyncMemoryCache = serviceProvider.GetService<IAsyncMemoryCache<string, IAsyncDisposable>>();
 		Assert.NotNull(asyncMemoryCache);
 	}
 
@@ -28,7 +28,7 @@ public class ExtensionsTests
 			.AddAsyncMemoryCache()
 			.BuildServiceProvider();
 
-		var asyncMemoryCache = serviceProvider.GetService<IAsyncMemoryCache<IAsyncDisposable>>();
+		var asyncMemoryCache = serviceProvider.GetService<IAsyncMemoryCache<string, IAsyncDisposable>>();
 		Assert.NotNull(asyncMemoryCache);
 	}
 }
