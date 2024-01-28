@@ -19,7 +19,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		_cts = new CancellationTokenSource();
 	}
 
-	public void Start<TKey, TValue>(AsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>> logger)
+	public void Start<TKey, TValue>(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>> logger)
 		where TKey : notnull
 		where TValue : IAsyncDisposable
 	{
@@ -42,7 +42,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		logger.LogTrace("Stopping behavior.");
 	}
 
-	private static async Task CheckExpiredItems<TKey, TValue>(AsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>> logger)
+	private static async Task CheckExpiredItems<TKey, TValue>(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>> logger)
 		where TKey : notnull
 		where TValue : IAsyncDisposable
 	{

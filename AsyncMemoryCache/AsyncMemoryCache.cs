@@ -25,7 +25,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	private readonly IEvictionBehavior _evictionBehavior;
 	private readonly ILogger<AsyncMemoryCache<TKey, TValue>> _logger;
 
-	public AsyncMemoryCache(AsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
+	public AsyncMemoryCache(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
 	{
 		_cache = configuration.CacheBackingStore;
 
