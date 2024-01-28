@@ -24,7 +24,7 @@ public class AsyncMemoryCacheTests
 			return Task.FromResult(Substitute.For<IAsyncDisposable>());
 		};
 
-		ICacheEntity<string, IAsyncDisposable>? entity = null;
+		CacheEntity<string, IAsyncDisposable>? entity = null;
 		var ex = await Record.ExceptionAsync(() => Task.Run(() => entity = target.Add("test", factory)).WaitAsync(TimeSpan.FromMilliseconds(500)));
 
 		Assert.Null(ex);
