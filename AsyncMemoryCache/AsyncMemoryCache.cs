@@ -1,9 +1,9 @@
-﻿using AsyncMemoryCache.EvictionBehaviors;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AsyncMemoryCache;
@@ -21,17 +21,17 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	where TKey : notnull
 	where TValue : IAsyncDisposable
 {
+	private readonly IAsyncMemoryCacheConfiguration<TKey, TValue> _configuration;
 	private readonly IDictionary<TKey, CacheEntity<TKey, TValue>> _cache;
-	private readonly IEvictionBehavior _evictionBehavior;
 	private readonly ILogger<AsyncMemoryCache<TKey, TValue>> _logger;
 
 	public AsyncMemoryCache(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
 	{
+		_configuration = configuration;
 		_cache = configuration.CacheBackingStore;
 
 		_logger = logger ?? NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<TKey, TValue>>();
-		_evictionBehavior = configuration.EvictionBehavior;
-		_evictionBehavior.Start(configuration, _logger);
+		configuration.EvictionBehavior.Start(configuration, _logger);
 	}
 
 	public AsyncLazy<TValue> this[TKey key]
@@ -65,5 +65,16 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		=> _cache.ContainsKey(key);
 
 	public async ValueTask DisposeAsync()
-		=> await _evictionBehavior.DisposeAsync();
+	{
+		await _configuration.EvictionBehavior.DisposeAsync();
+
+		var diposeTasks = _configuration.CacheBackingStore
+			.Select(async x =>
+			{
+				var cachedObject = await x.Value.ObjectFactory;
+				await cachedObject.DisposeAsync();
+			});
+
+		await Task.WhenAll(diposeTasks);
+	}
 }
