@@ -167,7 +167,7 @@ public class AsyncMemoryCacheTests
 		Assert.Same(cacheEntityReference2.CacheEntity, cacheEntityReference3.CacheEntity);
 		Assert.Same(cacheEntityReference1.CacheEntity, cacheEntityReference3.CacheEntity);
 
-		Assert.Equal(3, cacheEntityReference1.CacheEntity.Uses);
+		Assert.Equal(3, cacheEntityReference1.CacheEntity.References);
 	}
 
 	[Fact]
@@ -188,15 +188,15 @@ public class AsyncMemoryCacheTests
 		var cacheEntityReference1 = target.Add(key, () => Task.FromResult(cacheObject));
 
 		//Simulate evictionbehavior setting this to -1
-		cacheEntityReference1.CacheEntity.Uses = -1;
+		cacheEntityReference1.CacheEntity.References = -1;
 
 		var cacheEntityReference2 = target.Add(key, () => Task.FromResult(cacheObject));
 
 		Assert.NotSame(cacheEntityReference1, cacheEntityReference2);
 		Assert.NotSame(cacheEntityReference1.CacheEntity, cacheEntityReference2.CacheEntity);
 
-		Assert.Equal(-1, cacheEntityReference1.CacheEntity.Uses);
-		Assert.Equal(1, cacheEntityReference2.CacheEntity.Uses);
+		Assert.Equal(-1, cacheEntityReference1.CacheEntity.References);
+		Assert.Equal(1, cacheEntityReference2.CacheEntity.References);
 	}
 
 	private static AsyncMemoryCacheConfiguration<string, IAsyncDisposable> CreateConfiguration()

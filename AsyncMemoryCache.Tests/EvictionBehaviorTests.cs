@@ -245,7 +245,7 @@ public class EvictionBehaviorTests
 			.Returns(cacheBackingStore)
 			.AndDoes(_ => resetEvent.Set());
 
-		cacheBackingStore[expiredKey].Uses++;
+		cacheBackingStore[expiredKey].References++;
 
 		var timeProvider = new FakeTimeProvider(DateTime.UtcNow);
 		var target = new DefaultEvictionBehavior(timeProvider);

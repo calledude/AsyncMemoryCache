@@ -11,23 +11,23 @@ public class CacheEntityReferenceTests
 	public void IncrementsAndDecrementsProperly()
 	{
 		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
-		Assert.Equal(0, cacheEntity.Uses);
+		Assert.Equal(0, cacheEntity.References);
 
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
-		Assert.Equal(1, cacheEntity.Uses);
+		Assert.Equal(1, cacheEntity.References);
 
 		cacheEntityReference.Dispose();
-		Assert.Equal(0, cacheEntity.Uses);
+		Assert.Equal(0, cacheEntity.References);
 	}
 
 	[Fact]
 	public void MultipleDisposes_DecrementsOnlyOnce()
 	{
 		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
-		Assert.Equal(0, cacheEntity.Uses);
+		Assert.Equal(0, cacheEntity.References);
 
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
-		Assert.Equal(1, cacheEntity.Uses);
+		Assert.Equal(1, cacheEntity.References);
 #pragma warning disable
 		cacheEntityReference.Dispose();
 		cacheEntityReference.Dispose();
@@ -35,6 +35,6 @@ public class CacheEntityReferenceTests
 		cacheEntityReference.Dispose();
 		cacheEntityReference.Dispose();
 #pragma warning enable
-		Assert.Equal(0, cacheEntity.Uses);
+		Assert.Equal(0, cacheEntity.References);
 	}
 }

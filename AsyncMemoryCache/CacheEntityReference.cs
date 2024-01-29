@@ -15,7 +15,7 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 	public CacheEntityReference(CacheEntity<TKey, TValue> cacheEntity)
 	{
 		CacheEntity = cacheEntity;
-		_ = Interlocked.Increment(ref cacheEntity.Uses);
+		_ = Interlocked.Increment(ref cacheEntity.References);
 	}
 
 	[ExcludeFromCodeCoverage(Justification = "Finalizers are unreliable in tests")]
@@ -32,6 +32,6 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 		_disposed = true;
 
 		GC.SuppressFinalize(this);
-		_ = Interlocked.Decrement(ref CacheEntity.Uses);
+		_ = Interlocked.Decrement(ref CacheEntity.References);
 	}
 }

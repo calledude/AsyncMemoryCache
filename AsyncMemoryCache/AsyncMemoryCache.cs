@@ -53,19 +53,19 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		{
 			// If this if-statement fails it means that the refcount was at least -1
 			// so it is in fact expired, as such we shouldn't use it
-			if (Interlocked.Increment(ref entity.Uses) > 0)
+			if (Interlocked.Increment(ref entity.References) > 0)
 			{
 				entity.LastUse = DateTimeOffset.UtcNow;
 
 				var cacheEntityReference = new CacheEntityReference<TKey, TValue>(entity);
 
 				// Need to decrement here to revert the Increment in the if-statement
-				_ = Interlocked.Decrement(ref entity.Uses);
+				_ = Interlocked.Decrement(ref entity.References);
 				return cacheEntityReference;
 			}
 
 			// If the if-statement fails we need to decrement it again
-			_ = Interlocked.Decrement(ref entity.Uses);
+			_ = Interlocked.Decrement(ref entity.References);
 		}
 
 		var cacheEntity = new CacheEntity<TKey, TValue>(key, objectFactory, lazyFlags);
