@@ -1,3 +1,8 @@
+![Build](https://img.shields.io/github/actions/workflow/status/calledude/AsyncMemoryCache/build.yml)
+![Version](https://img.shields.io/nuget/v/AsyncMemoryCache)
+![Downloads](https://img.shields.io/nuget/dt/AsyncMemoryCache)
+![License](https://img.shields.io/github/license/calledude/AsyncMemoryCache)
+
 ## AsyncMemoryCache
 #### A highly configurable cache that aims to improve upon IMemoryCache without relying on it as its backing store.
 
