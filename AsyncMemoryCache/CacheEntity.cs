@@ -21,6 +21,9 @@ public sealed class CacheEntity<TKey, TValue>
 
 	internal DateTimeOffset LastUse { get; set; } = DateTimeOffset.UtcNow;
 
+	private int _uses;
+	internal ref int Uses => ref _uses;
+
 	public CacheEntity<TKey, TValue> WithAbsoluteExpiration(DateTimeOffset expiryDate)
 	{
 		AbsoluteExpiration = expiryDate;

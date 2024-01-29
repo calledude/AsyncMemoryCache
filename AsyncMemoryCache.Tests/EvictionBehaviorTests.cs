@@ -185,7 +185,7 @@ public class EvictionBehaviorTests
 	}
 
 	[Fact]
-	public async Task ExpiredCacheItemIsAlwaysDisposed()
+	public async Task ExpiredCacheItem_AlwaysDisposedIfRefCountBelowZero()
 	{
 		var expiredCacheObject = Substitute.For<IAsyncDisposable>();
 
@@ -222,5 +222,40 @@ public class EvictionBehaviorTests
 		await target.DisposeAsync();
 
 		await expiredCacheObject.Received(1).DisposeAsync();
+	}
+
+	[Fact]
+	public async Task ExpiredCacheItem_NeverDisposedIfRefCountAboveZero()
+	{
+		var expiredCacheObject = Substitute.For<IAsyncDisposable>();
+		const string expiredKey = "expired";
+		var cacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
+		{
+			{
+				expiredKey, new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
+				{
+					AbsoluteExpiration = DateTimeOffset.UtcNow
+				}
+			}
+		};
+
+		var resetEvent = new ManualResetEvent(false);
+		var config = Substitute.For<IAsyncMemoryCacheConfiguration<string, IAsyncDisposable>>();
+		_ = config.CacheBackingStore
+			.Returns(cacheBackingStore)
+			.AndDoes(_ => resetEvent.Set());
+
+		cacheBackingStore[expiredKey].Uses++;
+
+		var timeProvider = new FakeTimeProvider(DateTime.UtcNow);
+		var target = new DefaultEvictionBehavior(timeProvider);
+		target.Start(config, _logger);
+
+		timeProvider.Advance(TimeSpan.FromSeconds(30));
+
+		_ = resetEvent.WaitOne();
+		await target.DisposeAsync();
+
+		await expiredCacheObject.DidNotReceive().DisposeAsync();
 	}
 }

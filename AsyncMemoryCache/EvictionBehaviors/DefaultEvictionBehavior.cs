@@ -52,6 +52,13 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		var cache = configuration.CacheBackingStore;
 		foreach (var item in cache.Values)
 		{
+			if (Interlocked.Decrement(ref item.Uses) >= 0)
+			{
+				// Need to increment again to restore the refcounter
+				_ = Interlocked.Increment(ref item.Uses);
+				continue;
+			}
+
 			if (DateTimeOffset.UtcNow > item.AbsoluteExpiration
 				|| DateTimeOffset.UtcNow - item.LastUse > item.SlidingExpiration)
 			{
