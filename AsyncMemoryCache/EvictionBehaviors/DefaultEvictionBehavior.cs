@@ -56,6 +56,8 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 			{
 				// Need to increment again to restore the refcounter
 				_ = Interlocked.Increment(ref item.References);
+
+				logger.LogTrace("Keeping expired cache item {key} because it is still being referenced", item.Key);
 				continue;
 			}
 
