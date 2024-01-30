@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AsyncMemoryCache.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -7,7 +8,7 @@ using Xunit;
 
 namespace AsyncMemoryCache.Tests;
 
-public class ExtensionsTests
+public class ServiceCollectionExtensionsTests
 {
 	[Fact]
 	public void CanResolveAsyncMemoryCacheWithLogger()

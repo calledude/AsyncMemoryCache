@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace AsyncMemoryCache;
+namespace AsyncMemoryCache.Extensions;
 
-public static class Extensions
+public static class ServiceCollectionExtensions
 {
 	public static IServiceCollection AddAsyncMemoryCache<TKey, TValue>(this IServiceCollection services)
 		where TKey : notnull
