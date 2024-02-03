@@ -47,7 +47,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 
 	public CacheEntityReference<TKey, TValue> Add(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
 	{
-		_logger.LogTrace("Adding item with key: {key}", key);
+		_logger.LogTrace("Adding item with key: {Key}", key);
 
 		if (_cache.TryGetValue(key, out var entity))
 		{
@@ -72,7 +72,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		cacheEntity.ObjectFactory.Start();
 		_cache[key] = cacheEntity;
 
-		_logger.LogTrace("Added item with key: {key}", key);
+		_logger.LogTrace("Added item with key: {Key}", key);
 		return new(cacheEntity);
 	}
 

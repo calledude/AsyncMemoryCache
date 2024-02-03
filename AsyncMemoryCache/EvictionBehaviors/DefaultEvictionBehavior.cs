@@ -23,7 +23,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		where TKey : notnull
 		where TValue : IAsyncDisposable
 	{
-		logger.LogTrace("Starting evictionbehavior - expiry check interval {interval}.", _timer.Period);
+		logger.LogTrace("Starting evictionbehavior - expiry check interval {Interval}.", _timer.Period);
 		_workerTask = Task.Factory.StartNew(async () =>
 		{
 			try
@@ -57,7 +57,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 				// Need to increment again to restore the refcounter
 				_ = Interlocked.Increment(ref item.References);
 
-				logger.LogTrace("Keeping expired cache item {key} because it is still being referenced", item.Key);
+				logger.LogTrace("Keeping expired cache item {Key} because it is still being referenced", item.Key);
 				continue;
 			}
 
@@ -70,7 +70,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 
 		foreach (var expiredItem in expiredItems)
 		{
-			logger.LogTrace("Expiring item with key {key}", expiredItem.Key);
+			logger.LogTrace("Expiring item with key {Key}", expiredItem.Key);
 			var item = await expiredItem.ObjectFactory;
 			if (cache.Remove(expiredItem.Key) && configuration.CacheItemExpired is not null)
 			{
@@ -80,7 +80,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 			await item.DisposeAsync();
 		}
 
-		logger.LogTrace("Done checking expired items. Evicted {evictedItemsCount} items.", expiredItems.Count);
+		logger.LogTrace("Done checking expired items. Evicted {EvictedItemsCount} items.", expiredItems.Count);
 	}
 
 	public async ValueTask DisposeAsync()
