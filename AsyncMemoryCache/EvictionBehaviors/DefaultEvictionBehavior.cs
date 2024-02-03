@@ -86,7 +86,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 	public async ValueTask DisposeAsync()
 	{
 		_timer.Dispose();
-		_cts.Cancel();
+		await _cts.CancelAsync();
 
 		if (_workerTask is not null)
 		{
