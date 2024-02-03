@@ -28,9 +28,9 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		{
 			try
 			{
-				while (await _timer!.WaitForNextTickAsync(_cts.Token) && !_cts.IsCancellationRequested)
+				while (await _timer!.WaitForNextTickAsync(_cts.Token).ConfigureAwait(false) && !_cts.IsCancellationRequested)
 				{
-					await CheckExpiredItems(configuration, logger);
+					await CheckExpiredItems(configuration, logger).ConfigureAwait(false);
 				}
 			}
 			catch (OperationCanceledException)
@@ -77,7 +77,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 				configuration.CacheItemExpired.Invoke(expiredItem.Key, item);
 			}
 
-			await item.DisposeAsync();
+			await item.DisposeAsync().ConfigureAwait(false);
 		}
 
 		logger.LogTrace("Done checking expired items. Evicted {EvictedItemsCount} items.", expiredItems.Count);
@@ -86,11 +86,11 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 	public async ValueTask DisposeAsync()
 	{
 		_timer.Dispose();
-		await _cts.CancelAsync();
+		await _cts.CancelAsync().ConfigureAwait(false);
 
 		if (_workerTask is not null)
 		{
-			await _workerTask;
+			await _workerTask.ConfigureAwait(false);
 		}
 
 		_cts.Dispose();

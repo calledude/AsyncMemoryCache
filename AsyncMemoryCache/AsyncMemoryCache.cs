@@ -81,15 +81,15 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 
 	public async ValueTask DisposeAsync()
 	{
-		await _configuration.EvictionBehavior.DisposeAsync();
+		await _configuration.EvictionBehavior.DisposeAsync().ConfigureAwait(false);
 
 		var diposeTasks = _configuration.CacheBackingStore
 			.Select(async x =>
 			{
 				var cachedObject = await x.Value.ObjectFactory;
-				await cachedObject.DisposeAsync();
+				await cachedObject.DisposeAsync().ConfigureAwait(false);
 			});
 
-		await Task.WhenAll(diposeTasks);
+		await Task.WhenAll(diposeTasks).ConfigureAwait(false);
 	}
 }
