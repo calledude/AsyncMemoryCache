@@ -28,6 +28,8 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 
 	public AsyncMemoryCache(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
 	{
+		ArgumentNullException.ThrowIfNull(configuration);
+
 		_configuration = configuration;
 		_cache = configuration.CacheBackingStore;
 

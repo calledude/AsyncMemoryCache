@@ -14,6 +14,8 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 
 	public CacheEntityReference(CacheEntity<TKey, TValue> cacheEntity)
 	{
+		ArgumentNullException.ThrowIfNull(cacheEntity);
+
 		CacheEntity = cacheEntity;
 		_ = Interlocked.Increment(ref cacheEntity.References);
 	}
