@@ -1,5 +1,7 @@
 ![Build](https://img.shields.io/github/actions/workflow/status/calledude/AsyncMemoryCache/build.yml)
 [![Version](https://img.shields.io/nuget/v/AsyncMemoryCache)](https://www.nuget.org/packages/AsyncMemoryCache)
+[![Coverage](https://codecov.io/gh/calledude/AsyncMemoryCache/graph/badge.svg)](https://codecov.io/gh/calledude/AsyncMemoryCache)
+[![CodeFactor](https://img.shields.io/codefactor/grade/github/calledude/AsyncMemoryCache)](https://www.codefactor.io/repository/github/calledude/asyncmemorycache/)
 [![Downloads](https://img.shields.io/nuget/dt/AsyncMemoryCache)](https://www.nuget.org/packages/AsyncMemoryCache)
 [![License](https://img.shields.io/github/license/calledude/AsyncMemoryCache)](https://github.com/calledude/AsyncMemoryCache/blob/master/LICENSE)
 

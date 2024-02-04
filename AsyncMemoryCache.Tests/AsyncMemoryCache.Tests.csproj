@@ -7,6 +7,9 @@
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 
+		<CollectCoverage>true</CollectCoverage>
+		<CoverletOutputFormat>opencover</CoverletOutputFormat>
+
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisLevel>preview</AnalysisLevel>
 
@@ -15,6 +18,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="coverlet.msbuild" Version="6.0.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="GitHubActionsTestLogger" Version="2.3.3">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="8.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
