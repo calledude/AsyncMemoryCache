@@ -199,6 +199,74 @@ public class AsyncMemoryCacheTests
 		Assert.Equal(1, cacheEntityReference2.CacheEntity.References);
 	}
 
+	[Fact]
+	public void TryGetValue_ReturnsFalseIfItemDoesNotExist()
+	{
+		var evictionBehavior = Substitute.For<IEvictionBehavior>();
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
+		{
+			EvictionBehavior = evictionBehavior,
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+		};
+
+		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+
+		var exists = target.TryGetValue("doesNotExist", out var cacheEntityReference);
+
+		Assert.False(exists);
+		Assert.Null(cacheEntityReference);
+	}
+
+	[Fact]
+	public void TryGetValue_ReturnsFalseWhenBeingDisposed()
+	{
+		const string key = "test";
+
+		var evictionBehavior = Substitute.For<IEvictionBehavior>();
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
+		{
+			EvictionBehavior = evictionBehavior,
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			{
+				{ key, new(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None) }
+			}
+		};
+
+		config.CacheBackingStore[key].References = -1;
+
+		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+
+		var exists = target.TryGetValue(key, out var cacheEntityReference);
+
+		Assert.False(exists);
+		Assert.Null(cacheEntityReference);
+		Assert.Equal(-1, config.CacheBackingStore[key].References);
+	}
+
+	[Fact]
+	public void TryGetValue_ReturnsTrueIfItemExistsAndIncrementsReferenceCount()
+	{
+		const string key = "test";
+
+		var evictionBehavior = Substitute.For<IEvictionBehavior>();
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
+		{
+			EvictionBehavior = evictionBehavior,
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			{
+				{ key, new(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None) }
+			}
+		};
+
+		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+
+		var exists = target.TryGetValue(key, out var cacheEntityReference);
+
+		Assert.True(exists);
+		Assert.NotNull(cacheEntityReference);
+		Assert.Equal(1, cacheEntityReference.CacheEntity.References);
+	}
+
 	private static AsyncMemoryCacheConfiguration<string, IAsyncDisposable> CreateConfiguration()
 	{
 		return new()

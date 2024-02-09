@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ public interface IAsyncMemoryCache<TKey, TValue>
 	CacheEntityReference<TKey, TValue> this[TKey key] { get; }
 	CacheEntityReference<TKey, TValue> Add(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
 	bool ContainsKey(TKey key);
+	bool TryGetValue(TKey key, [NotNullWhen(true)] out CacheEntityReference<TKey, TValue>? value);
 }
 
 public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMemoryCache<TKey, TValue>
@@ -51,6 +53,22 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	{
 		_logger.LogTrace("Adding item with key: {Key}", key);
 
+		if (TryGetValue(key, out var entity))
+			return entity;
+
+		var cacheEntity = new CacheEntity<TKey, TValue>(key, objectFactory, lazyFlags);
+		cacheEntity.ObjectFactory.Start();
+		_cache[key] = cacheEntity;
+
+		_logger.LogTrace("Added item with key: {Key}", key);
+		return new(cacheEntity);
+	}
+
+	public bool ContainsKey(TKey key)
+		=> _cache.ContainsKey(key);
+
+	public bool TryGetValue(TKey key, [NotNullWhen(true)] out CacheEntityReference<TKey, TValue>? value)
+	{
 		if (_cache.TryGetValue(key, out var entity))
 		{
 			// If this if-statement fails it means that the refcount was at least -1
@@ -63,23 +81,18 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 
 				// Need to decrement here to revert the Increment in the if-statement
 				_ = Interlocked.Decrement(ref entity.References);
-				return cacheEntityReference;
+
+				value = cacheEntityReference;
+				return true;
 			}
 
 			// If the if-statement fails we need to decrement it again
 			_ = Interlocked.Decrement(ref entity.References);
 		}
 
-		var cacheEntity = new CacheEntity<TKey, TValue>(key, objectFactory, lazyFlags);
-		cacheEntity.ObjectFactory.Start();
-		_cache[key] = cacheEntity;
-
-		_logger.LogTrace("Added item with key: {Key}", key);
-		return new(cacheEntity);
+		value = null;
+		return false;
 	}
-
-	public bool ContainsKey(TKey key)
-		=> _cache.ContainsKey(key);
 
 	public async ValueTask DisposeAsync()
 	{
