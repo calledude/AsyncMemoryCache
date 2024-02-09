@@ -15,7 +15,7 @@ public interface IAsyncMemoryCache<TKey, TValue>
 	where TValue : IAsyncDisposable
 {
 	CacheEntityReference<TKey, TValue> this[TKey key] { get; }
-	CacheEntityReference<TKey, TValue> Add(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
+	CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
 	bool ContainsKey(TKey key);
 	bool TryGetValue(TKey key, [NotNullWhen(true)] out CacheEntityReference<TKey, TValue>? value);
 }
@@ -49,7 +49,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		}
 	}
 
-	public CacheEntityReference<TKey, TValue> Add(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
+	public CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
 	{
 		_logger.LogTrace("Adding item with key: {Key}", key);
 

@@ -27,7 +27,7 @@ public class AsyncMemoryCacheTests
 		};
 
 		CacheEntityReference<string, IAsyncDisposable>? cacheEntityReference = null;
-		var ex = await Record.ExceptionAsync(() => Task.Run(() => cacheEntityReference = target.Add("test", factory)).WaitAsync(TimeSpan.FromMilliseconds(500)));
+		var ex = await Record.ExceptionAsync(() => Task.Run(() => cacheEntityReference = target.GetOrCreate("test", factory)).WaitAsync(TimeSpan.FromMilliseconds(500)));
 
 		Assert.Null(ex);
 		Assert.NotNull(cacheEntityReference);
@@ -35,7 +35,7 @@ public class AsyncMemoryCacheTests
 	}
 
 	[Fact]
-	public async Task Add_ObjectIsReturnedInCacheEntity()
+	public async Task GetOrCreateObjectIsReturnedInCacheEntity()
 	{
 		var configuration = CreateConfiguration();
 		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
@@ -43,14 +43,14 @@ public class AsyncMemoryCacheTests
 		var objectToCache = Substitute.For<IAsyncDisposable>();
 		var factory = () => Task.FromResult(objectToCache);
 
-		var cacheEntityReference = target.Add("test", factory);
+		var cacheEntityReference = target.GetOrCreate("test", factory);
 
 		var cachedObject = await cacheEntityReference.CacheEntity.ObjectFactory;
 		Assert.Same(objectToCache, cachedObject);
 	}
 
 	[Fact]
-	public async Task Add_ObjectIsReturnedFromIndexer()
+	public async Task GetOrCreateObjectIsReturnedFromIndexer()
 	{
 		var configuration = CreateConfiguration();
 		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
@@ -59,14 +59,14 @@ public class AsyncMemoryCacheTests
 		var factory = () => Task.FromResult(objectToCache);
 
 		const string cacheKey = "test";
-		_ = target.Add(cacheKey, factory);
+		_ = target.GetOrCreate(cacheKey, factory);
 
 		var cachedObject = await target[cacheKey].CacheEntity.ObjectFactory;
 		Assert.Same(objectToCache, cachedObject);
 	}
 
 	[Fact]
-	public void Add_CalledTwice_ReturnsPreviousCacheEntity()
+	public void GetOrCreateCalledTwice_ReturnsPreviousCacheEntity()
 	{
 		var configuration = CreateConfiguration();
 		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
@@ -74,8 +74,8 @@ public class AsyncMemoryCacheTests
 		var factory = () => Task.FromResult(Substitute.For<IAsyncDisposable>());
 
 		const string cacheKey = "test";
-		var firstCacheEntity = target.Add(cacheKey, factory).CacheEntity;
-		var secondCacheEntity = target.Add(cacheKey, factory).CacheEntity;
+		var firstCacheEntity = target.GetOrCreate(cacheKey, factory).CacheEntity;
+		var secondCacheEntity = target.GetOrCreate(cacheKey, factory).CacheEntity;
 
 		Assert.Same(firstCacheEntity, secondCacheEntity);
 	}
@@ -107,7 +107,7 @@ public class AsyncMemoryCacheTests
 		var factory = () => Task.FromResult(Substitute.For<IAsyncDisposable>());
 
 		const string cacheKey = "test1";
-		_ = target.Add(cacheKey, factory);
+		_ = target.GetOrCreate(cacheKey, factory);
 
 		Assert.True(target.ContainsKey(cacheKey));
 		Assert.False(target.ContainsKey("doesNotExist"));
@@ -155,8 +155,8 @@ public class AsyncMemoryCacheTests
 		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
 
 		const string key = "test";
-		var cacheEntityReference1 = target.Add(key, () => Task.FromResult(cacheObject));
-		var cacheEntityReference2 = target.Add(key, () => Task.FromResult(cacheObject));
+		var cacheEntityReference1 = target.GetOrCreate(key, () => Task.FromResult(cacheObject));
+		var cacheEntityReference2 = target.GetOrCreate(key, () => Task.FromResult(cacheObject));
 		var cacheEntityReference3 = target[key];
 
 		Assert.NotSame(cacheEntityReference1, cacheEntityReference2);
@@ -185,12 +185,12 @@ public class AsyncMemoryCacheTests
 		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
 
 		const string key = "test";
-		var cacheEntityReference1 = target.Add(key, () => Task.FromResult(cacheObject));
+		var cacheEntityReference1 = target.GetOrCreate(key, () => Task.FromResult(cacheObject));
 
 		//Simulate evictionbehavior setting this to -1
 		cacheEntityReference1.CacheEntity.References = -1;
 
-		var cacheEntityReference2 = target.Add(key, () => Task.FromResult(cacheObject));
+		var cacheEntityReference2 = target.GetOrCreate(key, () => Task.FromResult(cacheObject));
 
 		Assert.NotSame(cacheEntityReference1, cacheEntityReference2);
 		Assert.NotSame(cacheEntityReference1.CacheEntity, cacheEntityReference2.CacheEntity);

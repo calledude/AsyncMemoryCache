@@ -35,7 +35,7 @@ var cacheConfig = new AsyncMemoryCacheConfiguration<string, TheClassToCache>
 var cache = new AsyncMemoryCache<string, TheClassToCache>(cacheConfig, cacheLogger); // Logger is optional
 
 // The factory is started here, will not block
-var cacheEntityReference = cache.Add("theKey", async () =>
+var cacheEntityReference = cache.GetOrCreate("theKey", async () =>
 {
 	var createdObject = await ...;
 	await Task.Delay(1000);
@@ -57,7 +57,7 @@ The way you deal with this is by `using` (calling `Dispose()` on) the `CacheEnti
 As long as at least one `CacheEntityReference` is alive (i.e. not disposed and still in-scope) the underlying cached object will not be evicted/disposed
 
 ```cs
-var cacheEntityReference = cache.Add("theKey", async () =>
+var cacheEntityReference = cache.GetOrCreate("theKey", async () =>
 {
 	var createdObject = await ...;
 	await Task.Delay(1000);
