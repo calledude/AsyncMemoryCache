@@ -10,14 +10,21 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
 	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
 	<PropertyGroup>
 		<PackageId>AsyncMemoryCache</PackageId>
 		<Title>AsyncMemoryCache</Title>
 		<Authors>calledude</Authors>
-		
-		<PackageProjectUrl>https://github.com/calledude/AsyncMemoryCache/</PackageProjectUrl>
 
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>asyncmemorycache async cache lazy dispose</PackageTags>
