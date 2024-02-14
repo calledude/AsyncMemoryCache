@@ -1,4 +1,5 @@
-﻿using Nito.AsyncEx;
+﻿using AsyncMemoryCache.ExpirationStrategy;
+using Nito.AsyncEx;
 using System;
 using System.Threading.Tasks;
 
@@ -15,24 +16,28 @@ public sealed class CacheEntity<TKey, TValue>
 	}
 
 	public TKey Key { get; }
-	public DateTimeOffset? AbsoluteExpiration { get; set; }
-	public TimeSpan? SlidingExpiration { get; set; }
-	public AsyncLazy<TValue> ObjectFactory { get; }
 
-	internal DateTimeOffset LastUse { get; set; } = DateTimeOffset.UtcNow;
+	public AsyncLazy<TValue> ObjectFactory { get; }
 
 	private int _references;
 	internal ref int References => ref _references;
+	internal IExpirationStrategy? ExpirationStrategy { get; private set; }
 
 	public CacheEntity<TKey, TValue> WithAbsoluteExpiration(DateTimeOffset expiryDate)
 	{
-		AbsoluteExpiration = expiryDate;
+		ExpirationStrategy = new AbsoluteExpirationStrategy(expiryDate);
 		return this;
 	}
 
 	public CacheEntity<TKey, TValue> WithSlidingExpiration(TimeSpan slidingExpirationWindow)
 	{
-		SlidingExpiration = slidingExpirationWindow;
+		ExpirationStrategy = new SlidingExpirationStrategy(slidingExpirationWindow);
+		return this;
+	}
+
+	public CacheEntity<TKey, TValue> WithExpirationStrategy(IExpirationStrategy expirationStrategy)
+	{
+		ExpirationStrategy = expirationStrategy;
 		return this;
 	}
 }

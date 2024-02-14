@@ -1,4 +1,5 @@
 using AsyncMemoryCache.EvictionBehaviors;
+using AsyncMemoryCache.ExpirationStrategy;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using NSubstitute;
@@ -265,6 +266,58 @@ public class AsyncMemoryCacheTests
 		Assert.True(exists);
 		Assert.NotNull(cacheEntityReference);
 		Assert.Equal(1, cacheEntityReference.CacheEntity.References);
+	}
+
+	[Fact]
+	public void TryGetValue_ExistingItemWithExpirationStrategy_CallsCacheEntityAccessed()
+	{
+		const string key = "test";
+
+		var expirationStrategy = Substitute.For<IExpirationStrategy>();
+
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
+		{
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			{
+				{
+					key,
+					new CacheEntity<string, IAsyncDisposable>(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None)
+						.WithExpirationStrategy(expirationStrategy)
+				}
+			}
+		};
+
+		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+
+		_ = target.TryGetValue(key, out var cacheEntityReference);
+
+		expirationStrategy.Received(1).CacheEntityAccessed();
+	}
+
+	[Fact]
+	public void Indexer_ExistingItemWithExpirationStrategy_CallsCacheEntityAccessed()
+	{
+		const string key = "test";
+
+		var expirationStrategy = Substitute.For<IExpirationStrategy>();
+
+		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
+		{
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			{
+				{
+					key,
+					new CacheEntity<string, IAsyncDisposable>(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None)
+						.WithExpirationStrategy(expirationStrategy)
+				}
+			}
+		};
+
+		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+
+		_ = target[key];
+
+		expirationStrategy.Received(1).CacheEntityAccessed();
 	}
 
 	private static AsyncMemoryCacheConfiguration<string, IAsyncDisposable> CreateConfiguration()

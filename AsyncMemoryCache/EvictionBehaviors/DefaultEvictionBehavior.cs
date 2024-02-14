@@ -61,11 +61,10 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 				continue;
 			}
 
-			if (DateTimeOffset.UtcNow > item.AbsoluteExpiration
-				|| DateTimeOffset.UtcNow - item.LastUse > item.SlidingExpiration)
-			{
-				expiredItems.Add(item);
-			}
+			if (!(item.ExpirationStrategy?.IsExpired() ?? false))
+				continue;
+
+			expiredItems.Add(item);
 		}
 
 		foreach (var expiredItem in expiredItems)

@@ -1,4 +1,5 @@
-﻿using Nito.AsyncEx;
+﻿using AsyncMemoryCache.ExpirationStrategy;
+using Nito.AsyncEx;
 using NSubstitute;
 using System;
 using System.Threading.Tasks;
@@ -17,7 +18,10 @@ public class CacheEntityTests
 		var cacheEntityReturned = cacheEntity.WithAbsoluteExpiration(absoluteExpiration);
 
 		Assert.Same(cacheEntity, cacheEntityReturned);
-		Assert.Equal(absoluteExpiration, cacheEntityReturned.AbsoluteExpiration);
+
+		var absoluteExpirationStrategy = cacheEntityReturned.ExpirationStrategy as AbsoluteExpirationStrategy;
+		Assert.NotNull(absoluteExpirationStrategy);
+		Assert.Equal(absoluteExpiration, absoluteExpirationStrategy.AbsoluteExpiration);
 	}
 
 	[Fact]
@@ -29,6 +33,16 @@ public class CacheEntityTests
 		var cacheEntityReturned = cacheEntity.WithSlidingExpiration(slidingExpiration);
 
 		Assert.Same(cacheEntity, cacheEntityReturned);
-		Assert.Equal(slidingExpiration, cacheEntityReturned.SlidingExpiration);
+
+		var slidingExpirationStrategy = cacheEntityReturned.ExpirationStrategy as SlidingExpirationStrategy;
+		Assert.NotNull(slidingExpirationStrategy);
+		Assert.Equal(slidingExpiration, slidingExpirationStrategy.SlidingExpirationWindow);
+	}
+
+	[Fact]
+	public void WithoutAnyExpirationStrategy()
+	{
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("key", () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None);
+		Assert.Null(cacheEntity.ExpirationStrategy);
 	}
 }

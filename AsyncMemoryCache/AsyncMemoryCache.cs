@@ -44,7 +44,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		get
 		{
 			var cacheEntity = _cache[key];
-			cacheEntity.LastUse = DateTimeOffset.UtcNow;
+			cacheEntity.ExpirationStrategy?.CacheEntityAccessed();
 			return new(cacheEntity);
 		}
 	}
@@ -75,7 +75,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 			// so it is in fact expired, as such we shouldn't use it
 			if (Interlocked.Increment(ref entity.References) > 0)
 			{
-				entity.LastUse = DateTimeOffset.UtcNow;
+				entity.ExpirationStrategy?.CacheEntityAccessed();
 
 				var cacheEntityReference = new CacheEntityReference<TKey, TValue>(entity);
 
