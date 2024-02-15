@@ -7,7 +7,7 @@ internal sealed class AbsoluteExpirationStrategy : IExpirationStrategy
 {
 	internal DateTimeOffset AbsoluteExpiration { get; }
 
-	public AbsoluteExpirationStrategy(DateTimeOffset expiryDate)
+	internal AbsoluteExpirationStrategy(DateTimeOffset expiryDate)
 	{
 		AbsoluteExpiration = expiryDate;
 	}
