@@ -12,11 +12,10 @@ public sealed class CacheEntity<TKey, TValue>
 	public CacheEntity(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags)
 	{
 		Key = key;
-		ObjectFactory = new AsyncLazy<TValue>(objectFactory, lazyFlags);
+		ObjectFactory = new(objectFactory, lazyFlags);
 	}
 
 	public TKey Key { get; }
-
 	public AsyncLazy<TValue> ObjectFactory { get; }
 
 	private int _references;

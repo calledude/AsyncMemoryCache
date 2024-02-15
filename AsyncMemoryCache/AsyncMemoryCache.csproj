@@ -3,14 +3,14 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		
+
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisLevel>preview</AnalysisLevel>
-		
+
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
 	</PropertyGroup>
-	
+
 	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
@@ -24,7 +24,7 @@
 		<Authors>calledude</Authors>
 
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		
+
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>asyncmemorycache async cache lazy dispose</PackageTags>
@@ -37,6 +37,16 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
+
+		<PackageReference Include="Roslynator.Analyzers" Version="4.10.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.10.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
 	</ItemGroup>
 
 	<ItemGroup>

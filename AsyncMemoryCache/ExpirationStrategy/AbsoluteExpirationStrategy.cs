@@ -16,5 +16,7 @@ internal sealed class AbsoluteExpirationStrategy : IExpirationStrategy
 		=> DateTimeOffset.UtcNow > AbsoluteExpiration;
 
 	[ExcludeFromCodeCoverage(Justification = "Empty implementation")]
-	public void CacheEntityAccessed() { }
+	public void CacheEntityAccessed()
+	{
+	}
 }

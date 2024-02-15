@@ -15,8 +15,8 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 	public DefaultEvictionBehavior(TimeProvider? timeProvider = default, TimeSpan? evictionCheckInterval = default)
 	{
 		var interval = evictionCheckInterval ?? TimeSpan.FromSeconds(30);
-		_timer = new PeriodicTimer(interval, timeProvider ?? TimeProvider.System);
-		_cts = new CancellationTokenSource();
+		_timer = new(interval, timeProvider ?? TimeProvider.System);
+		_cts = new();
 	}
 
 	public void Start<TKey, TValue>(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>> logger)
@@ -37,7 +37,8 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 			{
 				logger.LogTrace("CancellationToken was cancelled.");
 			}
-		}, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+		}, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+		.Unwrap();
 
 		logger.LogTrace("Stopping behavior.");
 	}
