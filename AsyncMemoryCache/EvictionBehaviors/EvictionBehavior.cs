@@ -5,7 +5,11 @@ namespace AsyncMemoryCache.EvictionBehaviors;
 
 public static class EvictionBehavior
 {
+#if NET8_0_OR_GREATER
 	public static readonly IEvictionBehavior Default = new DefaultEvictionBehavior(TimeProvider.System);
+#else
+	public static readonly IEvictionBehavior Default = new DefaultEvictionBehavior();
+#endif
 	public static readonly IEvictionBehavior Disabled = new NoOpEvictionBehavior();
 }
 

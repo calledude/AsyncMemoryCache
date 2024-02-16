@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 
 namespace AsyncMemoryCache.EvictionBehaviors;
 
+#if NET8_0_OR_GREATER
 [ExcludeFromCodeCoverage(Justification = "Nothing to test")]
+#endif
 internal sealed class NoOpEvictionBehavior : IEvictionBehavior
 {
 	public void Start<TKey, TValue>(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger)
@@ -14,5 +16,9 @@ internal sealed class NoOpEvictionBehavior : IEvictionBehavior
 	{
 	}
 
+#if NET8_0_OR_GREATER
 	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+#else
+	public ValueTask DisposeAsync() => default;
+#endif
 }

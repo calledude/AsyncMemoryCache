@@ -15,7 +15,9 @@ internal sealed class AbsoluteExpirationStrategy : IExpirationStrategy
 	public bool IsExpired()
 		=> DateTimeOffset.UtcNow > AbsoluteExpiration;
 
+#if NET8_0_OR_GREATER
 	[ExcludeFromCodeCoverage(Justification = "Empty implementation")]
+#endif
 	public void CacheEntityAccessed()
 	{
 	}

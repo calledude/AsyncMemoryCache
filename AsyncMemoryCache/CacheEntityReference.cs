@@ -14,13 +14,20 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 
 	public CacheEntityReference(CacheEntity<TKey, TValue> cacheEntity)
 	{
+#if NET8_0_OR_GREATER
 		ArgumentNullException.ThrowIfNull(cacheEntity);
+#else
+		if (cacheEntity is null)
+			throw new ArgumentNullException(nameof(cacheEntity));
+#endif
 
 		CacheEntity = cacheEntity;
 		_ = Interlocked.Increment(ref cacheEntity.References);
 	}
 
+#if NET8_0_OR_GREATER
 	[ExcludeFromCodeCoverage(Justification = "Finalizers are unreliable in tests")]
+#endif
 	~CacheEntityReference()
 	{
 		Dispose();
