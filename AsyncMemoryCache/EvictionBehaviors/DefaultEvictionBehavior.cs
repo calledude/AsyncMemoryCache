@@ -88,9 +88,10 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		{
 			logger.LogTrace("Expiring item with key {Key}", expiredItem.Key);
 			var item = await expiredItem.ObjectFactory;
-			if (cache.Remove(expiredItem.Key) && configuration.CacheItemExpired is not null)
+			if (cache.Remove(expiredItem.Key))
 			{
-				configuration.CacheItemExpired.Invoke(expiredItem.Key, item);
+				configuration.CacheItemExpired?.Invoke(expiredItem.Key, item);
+				expiredItem.ExpirationCallback?.Invoke(expiredItem.Key, item);
 			}
 
 			await item.DisposeAsync().ConfigureAwait(false);

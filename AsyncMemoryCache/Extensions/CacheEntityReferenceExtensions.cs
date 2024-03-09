@@ -28,4 +28,12 @@ public static class CacheEntityReferenceExtensions
 		_ = cacheEntityReference.CacheEntity.WithExpirationStrategy(expirationStrategy);
 		return cacheEntityReference;
 	}
+
+	public static CacheEntityReference<TKey, TValue> WithExpirationCallback<TKey, TValue>(this CacheEntityReference<TKey, TValue> cacheEntityReference, Action<TKey, TValue> expirationCallback)
+		where TKey : notnull
+		where TValue : IAsyncDisposable
+	{
+		_ = cacheEntityReference.CacheEntity.WithExpirationCallback(expirationCallback);
+		return cacheEntityReference;
+	}
 }

@@ -21,6 +21,7 @@ public sealed class CacheEntity<TKey, TValue>
 	private int _references;
 	internal ref int References => ref _references;
 	internal IExpirationStrategy? ExpirationStrategy { get; private set; }
+	internal Action<TKey, TValue>? ExpirationCallback { get; private set; }
 
 	public CacheEntity<TKey, TValue> WithAbsoluteExpiration(DateTimeOffset expiryDate)
 	{
@@ -37,6 +38,12 @@ public sealed class CacheEntity<TKey, TValue>
 	public CacheEntity<TKey, TValue> WithExpirationStrategy(IExpirationStrategy expirationStrategy)
 	{
 		ExpirationStrategy = expirationStrategy;
+		return this;
+	}
+
+	public CacheEntity<TKey, TValue> WithExpirationCallback(Action<TKey, TValue> expirationCallback)
+	{
+		ExpirationCallback = expirationCallback;
 		return this;
 	}
 }

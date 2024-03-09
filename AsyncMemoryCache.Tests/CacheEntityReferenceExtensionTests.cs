@@ -50,4 +50,17 @@ public class CacheEntityReferenceExtensionTests
 
 		Assert.Equal(expirationStrategy, cacheEntity.ExpirationStrategy);
 	}
+
+	[Fact]
+	public void WithExpirationCallbackExtension()
+	{
+		var expirationCallback = (string key, IAsyncDisposable obj) => { };
+
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
+		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
+
+		cacheEntityReference.WithExpirationCallback(expirationCallback);
+
+		Assert.Equal(expirationCallback, cacheEntity.ExpirationCallback);
+	}
 }
