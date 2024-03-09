@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;netstandard2.0;net462</TargetFrameworks>
 		<Nullable>enable</Nullable>
 
 		<LangVersion>latest</LangVersion>
@@ -36,7 +36,7 @@
 		</Description>
 	</PropertyGroup>
 
-	<ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+	<ItemGroup Condition="$(TargetFramework) != 'net8.0'">
 		<PackageReference Include="PolySharp" Version="1.14.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -47,11 +47,11 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
 		
-		<PackageReference Include="Roslynator.Analyzers" Version="4.10.0">
+		<PackageReference Include="Roslynator.Analyzers" Version="4.11.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.10.0">
+		<PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.11.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
