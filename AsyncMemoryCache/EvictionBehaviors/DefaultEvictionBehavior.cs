@@ -20,6 +20,11 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 	private readonly PeriodicTimer _timer;
 	private Task? _workerTask;
 
+	/// <summary>
+	/// Creates a new instance of <see cref="DefaultEvictionBehavior"/> with the supplied arguments.
+	/// </summary>
+	/// <param name="timeProvider">The <see cref="TimeProvider"/>.</param>
+	/// <param name="evictionCheckInterval">The interval to use when checking for expired items.</param>
 	public DefaultEvictionBehavior(TimeProvider? timeProvider = default, TimeSpan? evictionCheckInterval = default)
 	{
 		_interval = evictionCheckInterval ?? TimeSpan.FromSeconds(30);
@@ -29,6 +34,10 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 #else
 	private Timer? _timer;
 
+	/// <summary>
+	/// Creates a new instance of <see cref="DefaultEvictionBehavior"/> with the supplied arguments.
+	/// </summary>
+	/// <param name="evictionCheckInterval">The interval to use when checking for expired items.</param>
 	public DefaultEvictionBehavior(TimeSpan? evictionCheckInterval = default)
 	{
 		_cts = new();
@@ -36,6 +45,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 	}
 #endif
 
+	/// <inheritdoc/>
 	public void Start<TKey, TValue>(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>> logger)
 		where TKey : notnull
 		where TValue : IAsyncDisposable
@@ -106,6 +116,7 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		logger.LogTrace("Done checking expired items. Evicted {EvictedItemsCount} items.", expiredItems.Count);
 	}
 
+	/// <inheritdoc/>
 #if NET8_0_OR_GREATER
 	public async ValueTask DisposeAsync()
 	{

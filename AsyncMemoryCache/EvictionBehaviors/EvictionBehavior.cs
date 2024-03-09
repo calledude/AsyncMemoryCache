@@ -3,6 +3,9 @@ using System;
 
 namespace AsyncMemoryCache.EvictionBehaviors;
 
+/// <summary>
+/// A class containing default values for implementations of <see cref="IEvictionBehavior"/>
+/// </summary>
 public static class EvictionBehavior
 {
 	/// <inheritdoc cref="DefaultEvictionBehavior"/>
@@ -15,6 +18,10 @@ public static class EvictionBehavior
 	public static readonly IEvictionBehavior Disabled = new NoOpEvictionBehavior();
 }
 
+/// <summary>
+/// An interface that can be used to implement custom eviction behaviors.
+/// See <see cref="EvictionBehavior"/> for default implementations.
+/// </summary>
 public interface IEvictionBehavior : IAsyncDisposable
 {
 	/// <summary>

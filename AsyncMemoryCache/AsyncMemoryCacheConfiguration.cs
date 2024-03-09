@@ -16,6 +16,9 @@ public interface IAsyncMemoryCacheConfiguration<TKey, TValue>
 	where TKey : notnull
 	where TValue : IAsyncDisposable
 {
+	/// <summary>
+	/// The callback to be invoked when a cache item expires.
+	/// </summary>
 	Action<TKey, TValue>? CacheItemExpired { get; init; }
 
 	/// <summary>
@@ -38,6 +41,7 @@ public sealed class AsyncMemoryCacheConfiguration<TKey, TValue> : IAsyncMemoryCa
 	where TKey : notnull
 	where TValue : IAsyncDisposable
 {
+	/// <inheritdoc/>
 	public Action<TKey, TValue>? CacheItemExpired { get; init; }
 
 	/// <inheritdoc/>

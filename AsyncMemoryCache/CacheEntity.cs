@@ -14,13 +14,26 @@ public sealed class CacheEntity<TKey, TValue>
 	where TKey : notnull
 	where TValue : IAsyncDisposable
 {
+	/// <summary>
+	/// Creates a new instance of <see cref="CacheEntity{TKey, TValue}"/> with the supplied arguments.
+	/// </summary>
+	/// <param name="key">The <typeparamref name="TKey"/>.</param>
+	/// <param name="objectFactory">The <see cref="Func{TResult}">Func</see>&lt;<see cref="Task{TValue}"></see>&gt;.</param>
+	/// <param name="lazyFlags">The <see cref="AsyncLazyFlags"/>.</param>
 	public CacheEntity(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags)
 	{
 		Key = key;
 		ObjectFactory = new(objectFactory, lazyFlags);
 	}
 
+	/// <summary>
+	/// The <typeparamref name="TKey"/>.
+	/// </summary>
 	public TKey Key { get; }
+
+	/// <summary>
+	/// The <see cref="AsyncLazy{T}">AsyncLazy</see>&lt;<typeparamref name="TValue"/>&gt; which represents the cache item creation method.
+	/// </summary>
 	public AsyncLazy<TValue> ObjectFactory { get; }
 
 	private int _references;

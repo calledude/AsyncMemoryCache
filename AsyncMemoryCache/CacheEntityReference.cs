@@ -17,8 +17,15 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 {
 	private bool _disposed;
 
+	/// <summary>
+	/// The <see cref="CacheEntity{TKey, TValue}"/> which this object wraps.
+	/// </summary>
 	public CacheEntity<TKey, TValue> CacheEntity { get; }
 
+	/// <summary>
+	/// Creates a new instance of <see cref="CacheEntityReference{TKey, TValue}"/> with the supplied arguments.
+	/// </summary>
+	/// <param name="cacheEntity">The <see cref="CacheEntity{TKey, TValue}"/> to wrap.</param>
 	public CacheEntityReference(CacheEntity<TKey, TValue> cacheEntity)
 	{
 #if NET8_0_OR_GREATER
@@ -32,6 +39,10 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 		_ = Interlocked.Increment(ref cacheEntity.References);
 	}
 
+	/// <summary>
+	/// The finalizer for <see cref="CacheEntityReference{TKey, TValue}"/>.
+	/// This serves as a fail-safe if <see cref="Dispose"/> is never called.
+	/// </summary>
 #if NET8_0_OR_GREATER
 	[ExcludeFromCodeCoverage(Justification = "Finalizers are unreliable in tests")]
 #endif
@@ -40,6 +51,7 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 		Dispose();
 	}
 
+	/// <inheritdoc/>
 	public void Dispose()
 	{
 		if (_disposed)

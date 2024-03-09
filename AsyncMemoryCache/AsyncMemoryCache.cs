@@ -13,7 +13,7 @@ namespace AsyncMemoryCache;
 
 /// <summary>
 /// This interface exists mainly to avoid having concrete types as constructor arguments.
-/// An effect of this is enabling subsitution and as a result, easier testing, where an actual concrete instance is not required in each and every test that uses a class that looks like the following
+/// An effect of this is enabling substitution and as a result, easier testing, where an actual concrete instance is not required in each and every test that uses a class that looks like the following
 /// <para/>
 /// <code>
 /// public MyService(AsyncMemoryCache&lt;string, SomeCacheable&gt;) { }
@@ -71,6 +71,11 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	private readonly IDictionary<TKey, CacheEntity<TKey, TValue>> _cache;
 	private readonly ILogger<AsyncMemoryCache<TKey, TValue>> _logger;
 
+	/// <summary>
+	/// Creates a new instance of <see cref="AsyncMemoryCache{TKey, TValue}"/> with the supplied arguments.
+	/// </summary>
+	/// <param name="configuration">The <see cref="IAsyncMemoryCacheConfiguration{TKey, TValue}"/>.</param>
+	/// <param name="logger">The optional <see cref="ILogger{CategoryName}">ILogger</see>&lt;<see cref="AsyncMemoryCache{TKey, TValue}"></see>&gt;</param>
 	public AsyncMemoryCache(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
 	{
 #if NET8_0_OR_GREATER
@@ -146,6 +151,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		return false;
 	}
 
+	/// <inheritdoc/>
 	public async ValueTask DisposeAsync()
 	{
 		await _configuration.EvictionBehavior.DisposeAsync().ConfigureAwait(false);

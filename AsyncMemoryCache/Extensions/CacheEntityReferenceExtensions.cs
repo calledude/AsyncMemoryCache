@@ -3,6 +3,9 @@ using System;
 
 namespace AsyncMemoryCache.Extensions;
 
+/// <summary>
+/// A class containing extension methods to ease the configuration of a <see cref="CacheEntity{TKey, TValue}"/> object.
+/// </summary>
 public static class CacheEntityReferenceExtensions
 {
 	/// <summary>

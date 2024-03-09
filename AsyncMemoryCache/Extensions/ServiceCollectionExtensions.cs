@@ -3,6 +3,9 @@ using System;
 
 namespace AsyncMemoryCache.Extensions;
 
+/// <summary>
+/// A class containing extension methods to help with configuration of an <see cref="IServiceCollection"/>.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
 	/// <summary>
