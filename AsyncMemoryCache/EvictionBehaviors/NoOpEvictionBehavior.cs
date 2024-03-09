@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace AsyncMemoryCache.EvictionBehaviors;
 
+/// <summary>
+/// A no-op implementation of <see cref="IEvictionBehavior"/>.
+/// This class has no behavior. Use this to disable eviction functionality.
+/// </summary>
 #if NET8_0_OR_GREATER
 [ExcludeFromCodeCoverage(Justification = "Nothing to test")]
 #endif

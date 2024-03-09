@@ -1,9 +1,16 @@
-﻿using System;
+﻿using AsyncMemoryCache.EvictionBehaviors;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace AsyncMemoryCache;
 
+/// <summary>
+/// A class representing the lifetime of the underlying cached object.<br/>
+/// As long as this object is referenced/not disposed the cached object will not be evicted or disposed if <see cref="DefaultEvictionBehavior"/> is used.<br/>
+/// </summary>
+/// <typeparam name="TKey">The type of the key for the cache item.</typeparam>
+/// <typeparam name="TValue">The type of the value which the referenced <see cref="CacheEntity{TKey, TValue}"/> wraps.</typeparam>
 public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 	where TKey : notnull
 	where TValue : IAsyncDisposable

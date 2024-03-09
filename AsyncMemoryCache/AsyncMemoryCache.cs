@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AsyncMemoryCache.EvictionBehaviors;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
 using System;
@@ -10,16 +11,58 @@ using System.Threading.Tasks;
 
 namespace AsyncMemoryCache;
 
+/// <summary>
+/// This interface exists mainly to avoid having concrete types as constructor arguments.
+/// An effect of this is enabling subsitution and as a result, easier testing, where an actual concrete instance is not required in each and every test that uses a class that looks like the following
+/// <para/>
+/// <code>
+/// public MyService(AsyncMemoryCache&lt;string, SomeCacheable&gt;) { }
+/// </code>
+/// </summary>
+/// <typeparam name="TKey">The type of the key for cache items represented by the cache.</typeparam>
+/// <typeparam name="TValue">The type of the value which each item in the cache will hold.</typeparam>
 public interface IAsyncMemoryCache<TKey, TValue>
 	where TKey : notnull
 	where TValue : IAsyncDisposable
 {
+	/// <summary>
+	/// Gets the cached item with the specified key.
+	/// </summary>
+	/// <param name="key">The key of the element to get.</param>
+	/// <returns>A <see cref="CacheEntityReference{TKey, TValue}"/> representing the lifetime of the underlying <see cref="CacheEntity{TKey, TValue}"/> until disposed.</returns>
 	CacheEntityReference<TKey, TValue> this[TKey key] { get; }
+
+	/// <summary>
+	/// Gets the value associated with this key if it exists, or generates a new entry using the provided key and a value from the given factory if the key is not found.<br/>
+	/// The <paramref name="objectFactory"/> is started in a non-blocking fashion, and the result from it will have to be <c>await</c>ed
+	/// </summary>
+	/// <param name="key">The cache item key.</param>
+	/// <param name="objectFactory">The object factory.</param>
+	/// <param name="lazyFlags">Optional <see cref="AsyncLazyFlags"/> to configure object factory behavior.</param>
+	/// <returns>A <see cref="CacheEntityReference{TKey, TValue}"/> representing the lifetime of the underlying <see cref="CacheEntity{TKey, TValue}"/> until disposed.</returns>
 	CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
+
+	/// <summary>
+	/// Determines whether the <see cref="IAsyncMemoryCache{TKey, TValue}"/> contains an element with the specified key.
+	/// </summary>
+	/// <param name="key">The key to locate in the <see cref="IAsyncMemoryCache{TKey, TValue}"/>.</param>
+	/// <returns><see langword="true"/> if the <see cref="IAsyncMemoryCache{TKey, TValue}"/> contains a cache item with the key; otherwise, <see langword="false"/>.</returns>
 	bool ContainsKey(TKey key);
+
+	/// <summary>
+	/// Gets the value associated with the specified key.
+	/// </summary>
+	/// <param name="key">The key whose value to get.</param>
+	/// <param name="value">When this method returns, the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter.</param>
+	/// <returns><see langword="true"/> if a cache item with the specified key exists; otherwise <see langword="false"/>.</returns>
 	bool TryGetValue(TKey key, [NotNullWhen(true)] out CacheEntityReference<TKey, TValue>? value);
 }
 
+/// <summary>
+/// The default implementation of <see cref="IAsyncMemoryCache{TKey, TValue}"/>
+/// </summary>
+/// <typeparam name="TKey">The type of the key for cache items represented by the cache.</typeparam>
+/// <typeparam name="TValue">The type of the value which each item in the cache will hold.</typeparam>
 public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMemoryCache<TKey, TValue>
 	where TKey : notnull
 	where TValue : IAsyncDisposable
@@ -44,6 +87,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		configuration.EvictionBehavior.Start(configuration, _logger);
 	}
 
+	/// <inheritdoc/>
 	public CacheEntityReference<TKey, TValue> this[TKey key]
 	{
 		get
@@ -54,6 +98,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		}
 	}
 
+	/// <inheritdoc/>
 	public CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
 	{
 		_logger.LogTrace("Adding item with key: {Key}", key);
@@ -69,9 +114,11 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		return new(cacheEntity);
 	}
 
+	/// <inheritdoc/>
 	public bool ContainsKey(TKey key)
 		=> _cache.ContainsKey(key);
 
+	/// <inheritdoc/>
 	public bool TryGetValue(TKey key, [NotNullWhen(true)] out CacheEntityReference<TKey, TValue>? value)
 	{
 		if (_cache.TryGetValue(key, out var entity))

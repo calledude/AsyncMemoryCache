@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace AsyncMemoryCache.EvictionBehaviors;
 
+/// <summary>
+/// The default provided <see cref="IEvictionBehavior"/>.
+/// This class perodically checks for expired items and evicts them. Handling disposal and eviction callbacks as needed.
+/// <para/>
+/// If a cache entity is considered to be expired but still has a live reference via a <see cref="CacheEntityReference{TKey, TValue}"/> object the underlying cached item will not be evicted from the cache.
+/// </summary>
 public sealed class DefaultEvictionBehavior : IEvictionBehavior
 {
 	private readonly CancellationTokenSource _cts;
