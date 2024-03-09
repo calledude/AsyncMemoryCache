@@ -1,6 +1,9 @@
 ﻿using AsyncMemoryCache.ExpirationStrategy;
 using Nito.AsyncEx;
 using System;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace AsyncMemoryCache;
@@ -40,6 +43,26 @@ public sealed class CacheEntity<TKey, TValue>
 	internal ref int References => ref _references;
 	internal IExpirationStrategy? ExpirationStrategy { get; private set; }
 	internal Action<TKey, TValue>? ExpirationCallback { get; private set; }
+
+	/// <summary>
+	/// Asynchronous infrastructure support. This method permits instances of <see cref="CacheEntity{TKey, TValue}"/> to be await'ed.
+	/// </summary>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public TaskAwaiter<TValue> GetAwaiter()
+	{
+		return ObjectFactory.Task.GetAwaiter();
+	}
+
+	/// <summary>
+	/// Asynchronous infrastructure support. This method permits instances of <see cref="CacheEntity{TKey, TValue}"/> to be await'ed.
+	/// </summary>
+#if NET8_0_OR_GREATER
+	[ExcludeFromCodeCoverage(Justification = "There's no real functionality to be tested here, it's just enabling await")]
+#endif
+	public ConfiguredTaskAwaitable<TValue> ConfigureAwait(bool continueOnCapturedContext)
+	{
+		return ObjectFactory.Task.ConfigureAwait(continueOnCapturedContext);
+	}
 
 	/// <summary>
 	/// Sets the <see cref="ExpirationStrategy"/> to a new instance of <see cref="AbsoluteExpirationStrategy"/>.<br/>

@@ -1,6 +1,9 @@
 ﻿using AsyncMemoryCache.EvictionBehaviors;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace AsyncMemoryCache;
@@ -37,6 +40,26 @@ public sealed class CacheEntityReference<TKey, TValue> : IDisposable
 
 		CacheEntity = cacheEntity;
 		_ = Interlocked.Increment(ref cacheEntity.References);
+	}
+
+	/// <summary>
+	/// Asynchronous infrastructure support. This method permits instances of <see cref="CacheEntityReference{TKey, TValue}"/> to be await'ed.
+	/// </summary>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public TaskAwaiter<TValue> GetAwaiter()
+	{
+		return CacheEntity.GetAwaiter();
+	}
+
+	/// <summary>
+	/// Asynchronous infrastructure support. This method permits instances of <see cref="CacheEntityReference{TKey, TValue}"/> to be await'ed.
+	/// </summary>
+#if NET8_0_OR_GREATER
+	[ExcludeFromCodeCoverage(Justification = "There's no real functionality to be tested here, it's just enabling await")]
+#endif
+	public ConfiguredTaskAwaitable<TValue> ConfigureAwait(bool continueOnCapturedContext)
+	{
+		return CacheEntity.ConfigureAwait(continueOnCapturedContext);
 	}
 
 	/// <summary>

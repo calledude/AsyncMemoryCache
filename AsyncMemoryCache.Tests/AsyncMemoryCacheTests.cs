@@ -46,7 +46,7 @@ public class AsyncMemoryCacheTests
 
 		var cacheEntityReference = target.GetOrCreate("test", factory);
 
-		var cachedObject = await cacheEntityReference.CacheEntity.ObjectFactory;
+		var cachedObject = await cacheEntityReference.CacheEntity;
 		Assert.Same(objectToCache, cachedObject);
 	}
 
@@ -62,7 +62,7 @@ public class AsyncMemoryCacheTests
 		const string cacheKey = "test";
 		_ = target.GetOrCreate(cacheKey, factory);
 
-		var cachedObject = await target[cacheKey].CacheEntity.ObjectFactory;
+		var cachedObject = await target[cacheKey];
 		Assert.Same(objectToCache, cachedObject);
 	}
 

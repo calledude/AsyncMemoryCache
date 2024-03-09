@@ -45,7 +45,7 @@ var cacheEntityReference = cache.GetOrCreate("theKey", async () =>
 cacheEntityReference.CacheEntity.WithSlidingExpiration(TimeSpan.FromHours(12));
 
 // Will block here until the object is created
-var theCachedObject = await cache["theKey"].CacheEntity.ObjectFactory;
+var theCachedObject = await cache["theKey"]; // Short-hand for await cache["theKey"].CacheEntity.ObjectFactory;
 ```
 
 ### Extending the lifetime of a cached object
