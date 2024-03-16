@@ -85,6 +85,9 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 		var cache = configuration.CacheBackingStore;
 		foreach (var item in cache.Values)
 		{
+			if (item.ExpirationStrategy?.IsExpired() is not true)
+				continue;
+
 			if (Interlocked.Decrement(ref item.References) >= 0)
 			{
 				// Need to increment again to restore the refcounter
@@ -93,9 +96,6 @@ public sealed class DefaultEvictionBehavior : IEvictionBehavior
 				logger.LogTrace("Keeping expired cache item {Key} because it is still being referenced", item.Key);
 				continue;
 			}
-
-			if (!(item.ExpirationStrategy?.IsExpired() ?? false))
-				continue;
 
 			expiredItems.Add(item);
 		}
