@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace AsyncMemoryCache.Extensions;
@@ -20,7 +21,10 @@ public static class ServiceCollectionExtensions
 		where TValue : IAsyncDisposable
 	{
 		return services
-				.AddSingleton<IAsyncMemoryCache<TKey, TValue>, AsyncMemoryCache<TKey, TValue>>()
+				.AddSingleton<IAsyncMemoryCache<TKey, TValue>>(
+					sp => AsyncMemoryCache<TKey, TValue>.Create(
+						sp.GetRequiredService<IAsyncMemoryCacheConfiguration<TKey, TValue>>(),
+						sp.GetService<ILogger<AsyncMemoryCache<TKey, TValue>>>()))
 				.AddSingleton<IAsyncMemoryCacheConfiguration<TKey, TValue>, AsyncMemoryCacheConfiguration<TKey, TValue>>();
 	}
 
@@ -37,7 +41,9 @@ public static class ServiceCollectionExtensions
 		where TValue : IAsyncDisposable
 	{
 		return services
-				.AddSingleton<IAsyncMemoryCache<TKey, TValue>, AsyncMemoryCache<TKey, TValue>>()
-				.AddSingleton(configuration);
+				.AddSingleton<IAsyncMemoryCache<TKey, TValue>>(
+					sp => AsyncMemoryCache<TKey, TValue>.Create(
+						configuration,
+						sp.GetService<ILogger<AsyncMemoryCache<TKey, TValue>>>()));
 	}
 }

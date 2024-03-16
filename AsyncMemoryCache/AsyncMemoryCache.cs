@@ -71,12 +71,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	private readonly IDictionary<TKey, CacheEntity<TKey, TValue>> _cache;
 	private readonly ILogger<AsyncMemoryCache<TKey, TValue>> _logger;
 
-	/// <summary>
-	/// Creates a new instance of <see cref="AsyncMemoryCache{TKey, TValue}"/> with the supplied arguments.
-	/// </summary>
-	/// <param name="configuration">The <see cref="IAsyncMemoryCacheConfiguration{TKey, TValue}"/>.</param>
-	/// <param name="logger">The optional <see cref="ILogger{CategoryName}">ILogger</see>&lt;<see cref="AsyncMemoryCache{TKey, TValue}"></see>&gt;</param>
-	public AsyncMemoryCache(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
+	private AsyncMemoryCache(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
 	{
 #if NET8_0_OR_GREATER
 		ArgumentNullException.ThrowIfNull(configuration);
@@ -89,7 +84,18 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		_cache = configuration.CacheBackingStore;
 
 		_logger = logger ?? NullLoggerFactory.Instance.CreateLogger<AsyncMemoryCache<TKey, TValue>>();
-		configuration.EvictionBehavior.Start(configuration, _logger);
+	}
+
+	/// <summary>
+	/// Creates a new instance of <see cref="AsyncMemoryCache{TKey, TValue}"/> with the supplied arguments.
+	/// </summary>
+	/// <param name="configuration">The <see cref="IAsyncMemoryCacheConfiguration{TKey, TValue}"/>.</param>
+	/// <param name="logger">The optional <see cref="ILogger{CategoryName}">ILogger</see>&lt;<see cref="AsyncMemoryCache{TKey, TValue}"></see>&gt;</param>
+	public static AsyncMemoryCache<TKey, TValue> Create(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
+	{
+		var asyncMemoryCache = new AsyncMemoryCache<TKey, TValue>(configuration, logger);
+		configuration.EvictionBehavior.Start(configuration, asyncMemoryCache._logger);
+		return asyncMemoryCache;
 	}
 
 	/// <inheritdoc/>

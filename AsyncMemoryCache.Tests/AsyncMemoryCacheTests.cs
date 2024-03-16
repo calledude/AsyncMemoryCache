@@ -17,7 +17,7 @@ public class AsyncMemoryCacheTests
 	public async Task FactoryIsInvoked_DoesNotBlock()
 	{
 		var configuration = CreateConfiguration();
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(configuration);
 
 		var semaphore = new SemaphoreSlim(0, 1);
 
@@ -39,7 +39,7 @@ public class AsyncMemoryCacheTests
 	public async Task GetOrCreateObjectIsReturnedInCacheEntity()
 	{
 		var configuration = CreateConfiguration();
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(configuration);
 
 		var objectToCache = Substitute.For<IAsyncDisposable>();
 		var factory = () => Task.FromResult(objectToCache);
@@ -54,7 +54,7 @@ public class AsyncMemoryCacheTests
 	public async Task GetOrCreateObjectIsReturnedFromIndexer()
 	{
 		var configuration = CreateConfiguration();
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(configuration);
 
 		var objectToCache = Substitute.For<IAsyncDisposable>();
 		var factory = () => Task.FromResult(objectToCache);
@@ -70,7 +70,7 @@ public class AsyncMemoryCacheTests
 	public void GetOrCreateCalledTwice_ReturnsPreviousCacheEntity()
 	{
 		var configuration = CreateConfiguration();
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(configuration);
 
 		var factory = () => Task.FromResult(Substitute.For<IAsyncDisposable>());
 
@@ -90,7 +90,7 @@ public class AsyncMemoryCacheTests
 			EvictionBehavior = evictionBehavior
 		};
 
-		_ = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		_ = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		evictionBehavior
 			.Received(1)
@@ -103,7 +103,7 @@ public class AsyncMemoryCacheTests
 	public void ContainsKey()
 	{
 		var configuration = CreateConfiguration();
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(configuration);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(configuration);
 
 		var factory = () => Task.FromResult(Substitute.For<IAsyncDisposable>());
 
@@ -131,7 +131,7 @@ public class AsyncMemoryCacheTests
 			}
 		};
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		await target.DisposeAsync();
 
@@ -153,7 +153,7 @@ public class AsyncMemoryCacheTests
 			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
 		};
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		const string key = "test";
 		var cacheEntityReference1 = target.GetOrCreate(key, () => Task.FromResult(cacheObject));
@@ -183,7 +183,7 @@ public class AsyncMemoryCacheTests
 			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
 		};
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		const string key = "test";
 		var cacheEntityReference1 = target.GetOrCreate(key, () => Task.FromResult(cacheObject));
@@ -210,7 +210,7 @@ public class AsyncMemoryCacheTests
 			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
 		};
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		var exists = target.TryGetValue("doesNotExist", out var cacheEntityReference);
 
@@ -235,7 +235,7 @@ public class AsyncMemoryCacheTests
 
 		config.CacheBackingStore[key].References = -1;
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		var exists = target.TryGetValue(key, out var cacheEntityReference);
 
@@ -259,7 +259,7 @@ public class AsyncMemoryCacheTests
 			}
 		};
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		var exists = target.TryGetValue(key, out var cacheEntityReference);
 
@@ -287,7 +287,7 @@ public class AsyncMemoryCacheTests
 			}
 		};
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		_ = target.TryGetValue(key, out var cacheEntityReference);
 
@@ -313,7 +313,7 @@ public class AsyncMemoryCacheTests
 			}
 		};
 
-		var target = new AsyncMemoryCache<string, IAsyncDisposable>(config);
+		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
 
 		_ = target[key];
 

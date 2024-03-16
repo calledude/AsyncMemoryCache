@@ -15,13 +15,14 @@
 - Lazy construction of cache object
 - Supports asynchronous factories
 - Automatic disposal of expired cache entries
-- Integration with Microsoft.Extensions.DependencyInjection
-- Integration with Microsoft.Extensions.Logging
+- (Optional) Integration with Microsoft.Extensions.DependencyInjection
+- (Optional) Integration with Microsoft.Extensions.Logging
 
 
 ### Usage
 ```cs
 using AsyncMemoryCache;
+using AsyncMemoryCache.Extensions;
 
 ILoggerFactory loggerFactory = ...;
 
@@ -32,7 +33,7 @@ var cacheConfig = new AsyncMemoryCacheConfiguration<string, TheClassToCache>
 	EvictionBehavior = EvictionBehavior.Default // new DefaultEvictionBehavior(TimeProvider.System, TimeSpan.FromSeconds(45))
 };
 
-var cache = new AsyncMemoryCache<string, TheClassToCache>(cacheConfig, cacheLogger); // Logger is optional
+var cache = AsyncMemoryCache<string, TheClassToCache>.Create(cacheConfig, cacheLogger); // Logger is optional
 
 // The factory is started here, will not block
 var cacheEntityReference = cache.GetOrCreate("theKey", async () =>
@@ -40,9 +41,8 @@ var cacheEntityReference = cache.GetOrCreate("theKey", async () =>
 	var createdObject = await ...;
 	await Task.Delay(1000);
 	return createdObject;
-});
-
-cacheEntityReference.CacheEntity.WithSlidingExpiration(TimeSpan.FromHours(12));
+})
+.WithSlidingExpiration(TimeSpan.FromHours(12));
 
 // Will block here until the object is created
 var theCachedObject = await cache["theKey"]; // Short-hand for await cache["theKey"].CacheEntity.ObjectFactory;
@@ -57,15 +57,14 @@ The way you deal with this is by `using` (calling `Dispose()` on) the `CacheEnti
 As long as at least one `CacheEntityReference` is alive (i.e. not disposed and still in-scope) the underlying cached object will not be evicted/disposed
 
 ```cs
+// Create a cache entry that expires in 15 seconds
 var cacheEntityReference = cache.GetOrCreate("theKey", async () =>
 {
 	var createdObject = await ...;
 	await Task.Delay(1000);
 	return createdObject;
-});
-
-// Object expires in 15 seconds
-cacheEntityReference.CacheEntity.WithAbsoluteExpiration(DateTimeOffset.UtcNow.AddSeconds(15));
+})
+.WithAbsoluteExpiration(DateTimeOffset.UtcNow.AddSeconds(15));
 
 // do stuff with cache entry that takes longer than 15 seconds
 
