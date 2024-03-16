@@ -112,11 +112,10 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	/// <inheritdoc/>
 	public CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
 	{
-		_logger.LogTrace("Adding item with key: {Key}", key);
-
 		if (TryGetValue(key, out var entity))
 			return entity;
 
+		_logger.LogTrace("Adding item with key: {Key}", key);
 		var cacheEntity = new CacheEntity<TKey, TValue>(key, objectFactory, lazyFlags);
 		cacheEntity.ObjectFactory.Start();
 		_cache[key] = cacheEntity;
@@ -139,13 +138,11 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 			if (Interlocked.Increment(ref entity.References) > 0)
 			{
 				entity.ExpirationStrategy?.CacheEntityAccessed();
-
-				var cacheEntityReference = new CacheEntityReference<TKey, TValue>(entity);
+				value = new(entity);
 
 				// Need to decrement here to revert the Increment in the if-statement
 				_ = Interlocked.Decrement(ref entity.References);
 
-				value = cacheEntityReference;
 				return true;
 			}
 
