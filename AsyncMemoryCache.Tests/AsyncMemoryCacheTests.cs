@@ -23,12 +23,12 @@ public class AsyncMemoryCacheTests
 
 		var factory = () =>
 		{
-			semaphore.Wait();
+			semaphore.Wait(TestContext.Current.CancellationToken);
 			return Task.FromResult(Substitute.For<IAsyncDisposable>());
 		};
 
 		CacheEntityReference<string, IAsyncDisposable>? cacheEntityReference = null;
-		var ex = await Record.ExceptionAsync(() => Task.Run(() => cacheEntityReference = target.GetOrCreate("test", factory)).WaitAsync(TimeSpan.FromMilliseconds(500)));
+		var ex = await Record.ExceptionAsync(() => Task.Run(() => cacheEntityReference = target.GetOrCreate("test", factory)).WaitAsync(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken));
 
 		Assert.Null(ex);
 		Assert.NotNull(cacheEntityReference);
