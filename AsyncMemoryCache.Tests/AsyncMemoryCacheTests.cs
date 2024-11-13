@@ -87,7 +87,7 @@ public class AsyncMemoryCacheTests
 		var evictionBehavior = Substitute.For<IEvictionBehavior>();
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			EvictionBehavior = evictionBehavior
+			EvictionBehavior = evictionBehavior,
 		};
 
 		_ = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -124,11 +124,11 @@ public class AsyncMemoryCacheTests
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			EvictionBehavior = evictionBehavior,
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
 			{
 				{ "test1", new CacheEntity<string, IAsyncDisposable>("test1", () => Task.FromResult(cacheObject1), AsyncLazyFlags.None) },
-				{ "test2", new CacheEntity<string, IAsyncDisposable>("test2", () => Task.FromResult(cacheObject2), AsyncLazyFlags.None ) }
-			}
+				{ "test2", new CacheEntity<string, IAsyncDisposable>("test2", () => Task.FromResult(cacheObject2), AsyncLazyFlags.None ) },
+			},
 		};
 
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -150,7 +150,7 @@ public class AsyncMemoryCacheTests
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			EvictionBehavior = evictionBehavior,
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>(),
 		};
 
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -180,7 +180,7 @@ public class AsyncMemoryCacheTests
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			EvictionBehavior = evictionBehavior,
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>(),
 		};
 
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -207,7 +207,7 @@ public class AsyncMemoryCacheTests
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			EvictionBehavior = evictionBehavior,
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>(),
 		};
 
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -227,10 +227,10 @@ public class AsyncMemoryCacheTests
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			EvictionBehavior = evictionBehavior,
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
 			{
-				{ key, new(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None) }
-			}
+				{ key, new(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None) },
+			},
 		};
 
 		config.CacheBackingStore[key].References = -1;
@@ -253,10 +253,10 @@ public class AsyncMemoryCacheTests
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			EvictionBehavior = evictionBehavior,
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
 			{
-				{ key, new(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None) }
-			}
+				{ key, new(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None) },
+			},
 		};
 
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -277,14 +277,14 @@ public class AsyncMemoryCacheTests
 
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
 			{
 				{
 					key,
 					new CacheEntity<string, IAsyncDisposable>(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None)
 						.WithExpirationStrategy(expirationStrategy)
-				}
-			}
+				},
+			},
 		};
 
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -303,14 +303,14 @@ public class AsyncMemoryCacheTests
 
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>()
+			CacheBackingStore = new Dictionary<string, CacheEntity<string, IAsyncDisposable>>
 			{
 				{
 					key,
 					new CacheEntity<string, IAsyncDisposable>(key, () => Task.FromResult(Substitute.For<IAsyncDisposable>()), AsyncLazyFlags.None)
 						.WithExpirationStrategy(expirationStrategy)
-				}
-			}
+				},
+			},
 		};
 
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(config);
@@ -324,7 +324,7 @@ public class AsyncMemoryCacheTests
 	{
 		return new()
 		{
-			EvictionBehavior = EvictionBehavior.Disabled
+			EvictionBehavior = EvictionBehavior.Disabled,
 		};
 	}
 }

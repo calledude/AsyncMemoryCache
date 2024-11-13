@@ -54,7 +54,7 @@ public class CacheEntityReferenceExtensionTests
 	[Fact]
 	public void WithExpirationCallbackExtension()
 	{
-		var expirationCallback = (string key, IAsyncDisposable obj) => { };
+		var expirationCallback = (string _, IAsyncDisposable _) => { };
 
 		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);

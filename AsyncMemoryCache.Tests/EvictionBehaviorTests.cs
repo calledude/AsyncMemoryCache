@@ -34,7 +34,7 @@ public class EvictionBehaviorTests
 
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			CacheBackingStore = cache
+			CacheBackingStore = cache,
 		};
 
 		var timeProvider = new FakeTimeProvider();
@@ -113,7 +113,7 @@ public class EvictionBehaviorTests
 
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			CacheBackingStore = cache
+			CacheBackingStore = cache,
 		};
 
 		target.Start(config, _logger);
@@ -143,7 +143,7 @@ public class EvictionBehaviorTests
 
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			CacheBackingStore = cache
+			CacheBackingStore = cache,
 		};
 
 		var target = new DefaultEvictionBehavior(null, TimeSpan.FromMilliseconds(1));
@@ -180,7 +180,7 @@ public class EvictionBehaviorTests
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
 			CacheItemExpired = null,
-			CacheBackingStore = cache
+			CacheBackingStore = cache,
 		};
 
 		target.Start(config, _logger);
@@ -203,7 +203,7 @@ public class EvictionBehaviorTests
 			{
 				expiredKey, new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
 					.WithAbsoluteExpiration(DateTimeOffset.UtcNow)
-			}
+			},
 		};
 
 		var resetEvent = new ManualResetEvent(false);
@@ -236,7 +236,7 @@ public class EvictionBehaviorTests
 			{
 				// Not setting any expiration strategy
 				expiredKey, new CacheEntity<string, IAsyncDisposable>(expiredKey, () => Task.FromResult(expiredCacheObject), AsyncLazyFlags.None)
-			}
+			},
 		};
 
 		var resetEvent = new ManualResetEvent(false);
@@ -263,10 +263,8 @@ public class EvictionBehaviorTests
 		const string expiredKey = "expired";
 
 		var resetEvent = new ManualResetEvent(false);
-		var globalCacheItemExpiredCallbackCalled = false;
-		var globalCacheItemExpiredCallback = (string key, IAsyncDisposable value) => { globalCacheItemExpiredCallbackCalled = true; };
 		var cacheItemExpirationCallbackCalled = false;
-		var cacheItemExpirationCallback = (string key, IAsyncDisposable value) => 
+		var cacheItemExpirationCallback = (string _, IAsyncDisposable _) =>
 		{
 			cacheItemExpirationCallbackCalled = true;
 			resetEvent.Set();
@@ -288,10 +286,11 @@ public class EvictionBehaviorTests
 
 		var timeProvider = new FakeTimeProvider(DateTime.UtcNow);
 		var target = new DefaultEvictionBehavior(timeProvider);
+		var globalCacheItemExpiredCallbackCalled = false;
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			CacheItemExpired = globalCacheItemExpiredCallback,
-			CacheBackingStore = cache
+			CacheItemExpired = (string _, IAsyncDisposable _) => globalCacheItemExpiredCallbackCalled = true,
+			CacheBackingStore = cache,
 		};
 
 		target.Start(config, _logger);

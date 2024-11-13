@@ -22,7 +22,7 @@ public class ExpirationStrategyTests
 	{
 		var target = new SlidingExpirationStrategy(TimeSpan.FromMinutes(1))
 		{
-			LastUse = DateTimeOffset.UtcNow.AddMinutes(lastUseOffset)
+			LastUse = DateTimeOffset.UtcNow.AddMinutes(lastUseOffset),
 		};
 
 		Assert.Equal(expectedExpiryState, target.IsExpired());
@@ -34,7 +34,7 @@ public class ExpirationStrategyTests
 		var lastUse = DateTimeOffset.MinValue;
 		var target = new SlidingExpirationStrategy(TimeSpan.Zero)
 		{
-			LastUse = lastUse
+			LastUse = lastUse,
 		};
 
 		target.CacheEntityAccessed();

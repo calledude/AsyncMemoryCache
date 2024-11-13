@@ -1,5 +1,4 @@
-﻿using AsyncMemoryCache.EvictionBehaviors;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
 using System;
@@ -91,6 +90,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	/// </summary>
 	/// <param name="configuration">The <see cref="IAsyncMemoryCacheConfiguration{TKey, TValue}"/>.</param>
 	/// <param name="logger">The optional <see cref="ILogger{CategoryName}">ILogger</see>&lt;<see cref="AsyncMemoryCache{TKey, TValue}"></see>&gt;</param>
+	/// <exception cref="ArgumentNullException">When <paramref name="configuration"/> is null</exception>
 	public static AsyncMemoryCache<TKey, TValue> Create(IAsyncMemoryCacheConfiguration<TKey, TValue> configuration, ILogger<AsyncMemoryCache<TKey, TValue>>? logger = null)
 	{
 		var asyncMemoryCache = new AsyncMemoryCache<TKey, TValue>(configuration, logger);
@@ -162,7 +162,7 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 		var diposeTasks = _configuration.CacheBackingStore
 			.Select(async x =>
 			{
-				var cachedObject = await x.Value;
+				var cachedObject = await x.Value.ConfigureAwait(false);
 				await cachedObject.DisposeAsync().ConfigureAwait(false);
 			});
 
