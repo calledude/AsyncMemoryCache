@@ -37,22 +37,22 @@
 		</Description>
 	</PropertyGroup>
 
-	<ItemGroup Condition="$(TargetFramework) != 'net8.0'">
-		<PackageReference Include="PolySharp" Version="1.14.1">
+	<ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETCoreApp'">
+		<PackageReference Include="PolySharp" Version="1.15.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	
+
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
 		<PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
-		
-		<PackageReference Include="Roslynator.Analyzers" Version="4.12.9">
+
+		<PackageReference Include="Roslynator.Analyzers" Version="4.13.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.12.9">
+		<PackageReference Include="Roslynator.Formatting.Analyzers" Version="4.13.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
