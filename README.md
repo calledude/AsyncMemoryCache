@@ -15,6 +15,7 @@
 - Lazy construction of cache object
 - Supports asynchronous factories
 - Automatic disposal of expired cache entries
+- Custom creation time providers
 - (Optional) Integration with Microsoft.Extensions.DependencyInjection
 - (Optional) Integration with Microsoft.Extensions.Logging
 
@@ -72,4 +73,21 @@ var cacheEntityReference = cache.GetOrCreate("theKey", async () =>
 
 // The underlying cached object is not immediately disposed here, but is now eligible for disposal later on by eviction behaviors (if enabled)
 cacheEntityReference.Dispose();
+```
+
+### Custom Creation Time Providers
+You can provide custom creation time providers to control the expected creation time of cache entries.
+
+```cs
+public class CustomCreationTimeProvider : ICreationTimeProvider
+{
+	public DateTimeOffset GetExpectedCreationTime()
+	{
+		// Custom logic to determine the creation time
+		return DateTimeOffset.UtcNow.AddMinutes(5);
+	}
+}
+
+var customCreationTimeProvider = new CustomCreationTimeProvider();
+var cacheEntityReference = cache.GetOrCreate("theKey", factory, creationTimeProvider: customCreationTimeProvider);
 ```

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AsyncMemoryCache.CreationBehaviors;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
 using System;
@@ -38,8 +39,9 @@ public interface IAsyncMemoryCache<TKey, TValue>
 	/// <param name="key">The cache item key.</param>
 	/// <param name="objectFactory">The object factory.</param>
 	/// <param name="lazyFlags">Optional <see cref="AsyncLazyFlags"/> to configure object factory behavior.</param>
+	/// <param name="creationTimeProvider">Optional <see cref="ICreationTimeProvider"/> to configure the creation time.</param>
 	/// <returns>A <see cref="CacheEntityReference{TKey, TValue}"/> representing the lifetime of the underlying <see cref="CacheEntity{TKey, TValue}"/> until disposed.</returns>
-	CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None);
+	CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None, ICreationTimeProvider? creationTimeProvider = default);
 
 	/// <summary>
 	/// Determines whether the <see cref="IAsyncMemoryCache{TKey, TValue}"/> contains an element with the specified key.
@@ -110,14 +112,18 @@ public sealed class AsyncMemoryCache<TKey, TValue> : IAsyncDisposable, IAsyncMem
 	}
 
 	/// <inheritdoc/>
-	public CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None)
+	public CacheEntityReference<TKey, TValue> GetOrCreate(TKey key, Func<Task<TValue>> objectFactory, AsyncLazyFlags lazyFlags = AsyncLazyFlags.None, ICreationTimeProvider? creationTimeProvider = default)
 	{
 		if (TryGetValue(key, out var entity))
 			return entity;
 
 		_logger.LogTrace("Adding item with key: {Key}", key);
 		var cacheEntity = new CacheEntity<TKey, TValue>(key, objectFactory, lazyFlags);
-		cacheEntity.ObjectFactory.Start();
+#if !NET8_0_OR_GREATER
+		CacheItemFactoryInvoker.InvokeFactory(cacheEntity, creationTimeProvider ?? CreationTimeProvider.Default);
+#else
+		CacheItemFactoryInvoker.InvokeFactory(cacheEntity, creationTimeProvider ?? CreationTimeProvider.Default, TimeProvider.System);
+#endif
 		_cache[key] = cacheEntity;
 
 		_logger.LogTrace("Added item with key: {Key}", key);

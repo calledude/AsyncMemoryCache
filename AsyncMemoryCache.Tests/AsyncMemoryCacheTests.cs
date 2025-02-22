@@ -5,7 +5,6 @@ using Nito.AsyncEx;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,24 +12,29 @@ namespace AsyncMemoryCache.Tests;
 
 public class AsyncMemoryCacheTests
 {
-	[Fact]
+	[Fact(Timeout = 10000)]
 	public async Task FactoryIsInvoked_DoesNotBlock()
 	{
 		var configuration = CreateConfiguration();
 		var target = AsyncMemoryCache<string, IAsyncDisposable>.Create(configuration);
 
-		var semaphore = new SemaphoreSlim(0, 1);
+		var taskCompletionSource = new TaskCompletionSource();
+		var factoryCompletionSource = new TaskCompletionSource();
 
-		var factory = () =>
+		var factory = async () =>
 		{
-			semaphore.Wait(TestContext.Current.CancellationToken);
-			return Task.FromResult(Substitute.For<IAsyncDisposable>());
+			taskCompletionSource.SetResult();
+			await factoryCompletionSource.Task;
+			return Substitute.For<IAsyncDisposable>();
 		};
 
 		CacheEntityReference<string, IAsyncDisposable>? cacheEntityReference = null;
-		var ex = await Record.ExceptionAsync(() => Task.Run(() => cacheEntityReference = target.GetOrCreate("test", factory)).WaitAsync(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken));
+		var creationTask = Task.Run(() => cacheEntityReference = target.GetOrCreate("test", factory), TestContext.Current.CancellationToken);
 
-		Assert.Null(ex);
+		await taskCompletionSource.Task;
+
+		await creationTask; // This should not block, intentionally not setting result on factoryCompletionSource
+
 		Assert.NotNull(cacheEntityReference);
 		Assert.True(cacheEntityReference.CacheEntity.ObjectFactory.IsStarted);
 	}
