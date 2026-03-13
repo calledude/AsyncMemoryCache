@@ -37,7 +37,7 @@ jobs:
       run: dotnet pack -c Release --no-build /p:PackageVersion=${{ env.GitVersion_SemVer }}
 
     - name: Test
-      run: dotnet test -c Release --no-build --verbosity normal --logger GitHubActions
+      run: dotnet test -c Release --no-build --verbosity normal --report-github
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5.5.2
