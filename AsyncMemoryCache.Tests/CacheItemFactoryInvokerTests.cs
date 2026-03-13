@@ -9,96 +9,95 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace AsyncMemoryCache.Tests
+namespace AsyncMemoryCache.Tests;
+
+public class CacheItemFactoryInvokerTests
 {
-	public class CacheItemFactoryInvokerTests
+	[Fact]
+	public void InvokeFactory_ShouldInvokeObjectFactoryAfterDelay()
 	{
-		[Fact]
-		public void InvokeFactory_ShouldInvokeObjectFactoryAfterDelay()
+		using var syncContext = new SingleThreadSynchronizationContext();
+
+		var manualResetEvent = new ManualResetEvent(false);
+
+		var factory = () =>
 		{
-			using var syncContext = new SingleThreadSynchronizationContext();
+			manualResetEvent.Set();
+			return Task.FromResult(Substitute.For<IAsyncDisposable>());
+		};
 
-			var manualResetEvent = new ManualResetEvent(false);
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", factory, AsyncLazyFlags.None);
 
-			var factory = () =>
-			{
-				manualResetEvent.Set();
-				return Task.FromResult(Substitute.For<IAsyncDisposable>());
-			};
+		var creationTimeProvider = Substitute.For<ICreationTimeProvider>();
+		var timeProvider = new FakeTimeProvider();
+		var expectedCreationTime = timeProvider.GetUtcNow().AddMilliseconds(100);
+		creationTimeProvider.GetExpectedCreationTime().Returns(expectedCreationTime);
 
-			var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", factory, AsyncLazyFlags.None);
+		CacheItemFactoryInvoker.InvokeFactory(cacheEntity, creationTimeProvider, timeProvider);
 
-			var creationTimeProvider = Substitute.For<ICreationTimeProvider>();
-			var timeProvider = new FakeTimeProvider();
-			var expectedCreationTime = timeProvider.GetUtcNow().AddMilliseconds(100);
-			creationTimeProvider.GetExpectedCreationTime().Returns(expectedCreationTime);
+		syncContext.RunOnCurrentThread();
 
-			CacheItemFactoryInvoker.InvokeFactory(cacheEntity, creationTimeProvider, timeProvider);
+		Assert.False(cacheEntity.ObjectFactory.IsStarted);
+		timeProvider.Advance(TimeSpan.FromMilliseconds(99));
+		Assert.False(cacheEntity.ObjectFactory.IsStarted);
+		timeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
-			syncContext.RunOnCurrentThread();
+		manualResetEvent.WaitOne();
+		Assert.True(cacheEntity.ObjectFactory.IsStarted);
+	}
 
-			Assert.False(cacheEntity.ObjectFactory.IsStarted);
-			timeProvider.Advance(TimeSpan.FromMilliseconds(99));
-			Assert.False(cacheEntity.ObjectFactory.IsStarted);
-			timeProvider.Advance(TimeSpan.FromMilliseconds(100));
+	[Fact]
+	public void InvokeFactory_ShouldInvokeObjectFactoryImmediatelyIfNoDelay()
+	{
+		using var syncContext = new SingleThreadSynchronizationContext();
 
-			manualResetEvent.WaitOne();
-			Assert.True(cacheEntity.ObjectFactory.IsStarted);
+		var manualResetEvent = new ManualResetEvent(false);
+
+		var factory = () =>
+		{
+			manualResetEvent.Set();
+			return Task.FromResult(Substitute.For<IAsyncDisposable>());
+		};
+
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", factory, AsyncLazyFlags.None);
+
+		var sw = Stopwatch.StartNew();
+		CacheItemFactoryInvoker.InvokeFactory(cacheEntity, CreationTimeProvider.Default, TimeProvider.System);
+
+		syncContext.RunOnCurrentThread();
+
+		manualResetEvent.WaitOne();
+		Assert.InRange(sw.ElapsedMilliseconds, 0, 50);
+	}
+
+	private class SingleThreadSynchronizationContext : SynchronizationContext, IDisposable
+	{
+		private readonly Queue<(SendOrPostCallback, object?)> _queue = new();
+		private readonly SynchronizationContext? _originalContext;
+
+		public SingleThreadSynchronizationContext()
+		{
+			_originalContext = Current;
+			SetSynchronizationContext(this);
 		}
 
-		[Fact]
-		public void InvokeFactory_ShouldInvokeObjectFactoryImmediatelyIfNoDelay()
+		public override void Post(SendOrPostCallback d, object? state)
 		{
-			using var syncContext = new SingleThreadSynchronizationContext();
-
-			var manualResetEvent = new ManualResetEvent(false);
-
-			var factory = () =>
-			{
-				manualResetEvent.Set();
-				return Task.FromResult(Substitute.For<IAsyncDisposable>());
-			};
-
-			var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", factory, AsyncLazyFlags.None);
-
-			var sw = Stopwatch.StartNew();
-			CacheItemFactoryInvoker.InvokeFactory(cacheEntity, CreationTimeProvider.Default, TimeProvider.System);
-
-			syncContext.RunOnCurrentThread();
-
-			manualResetEvent.WaitOne();
-			Assert.InRange(sw.ElapsedMilliseconds, 0, 50);
+			_queue.Enqueue((d, state));
 		}
 
-		private class SingleThreadSynchronizationContext : SynchronizationContext, IDisposable
+		public void RunOnCurrentThread()
 		{
-			private readonly Queue<(SendOrPostCallback, object?)> _queue = new();
-			private readonly SynchronizationContext? _originalContext;
-
-			public SingleThreadSynchronizationContext()
+			while (_queue.Count > 0)
 			{
-				_originalContext = Current;
-				SetSynchronizationContext(this);
+				var (callback, state) = _queue.Dequeue();
+				callback(state);
 			}
+		}
 
-			public override void Post(SendOrPostCallback d, object? state)
-			{
-				_queue.Enqueue((d, state));
-			}
-
-			public void RunOnCurrentThread()
-			{
-				while (_queue.Count > 0)
-				{
-					var (callback, state) = _queue.Dequeue();
-					callback(state);
-				}
-			}
-
-			public void Dispose()
-			{
-				SetSynchronizationContext(_originalContext);
-			}
+		public void Dispose()
+		{
+			SetSynchronizationContext(_originalContext);
 		}
 	}
 }

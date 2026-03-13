@@ -10,7 +10,7 @@ public class CacheEntityReferenceTests
 	[Fact]
 	public void IncrementsAndDecrementsProperly()
 	{
-		var cacheEntity = new CacheEntity<string, IAsyncDisposable>(string.Empty, () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>(string.Empty, () => Task.FromResult<IAsyncDisposable>(null!), AsyncLazyFlags.None);
 		Assert.Equal(0, cacheEntity.References);
 
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
@@ -23,7 +23,7 @@ public class CacheEntityReferenceTests
 	[Fact]
 	public void MultipleDisposes_DecrementsOnlyOnce()
 	{
-		var cacheEntity = new CacheEntity<string, IAsyncDisposable>(string.Empty, () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>(string.Empty, () => Task.FromResult<IAsyncDisposable>(null!), AsyncLazyFlags.None);
 		Assert.Equal(0, cacheEntity.References);
 
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);

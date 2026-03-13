@@ -289,7 +289,7 @@ public class EvictionBehaviorTests
 		var globalCacheItemExpiredCallbackCalled = false;
 		var config = new AsyncMemoryCacheConfiguration<string, IAsyncDisposable>
 		{
-			CacheItemExpired = (string _, IAsyncDisposable _) => globalCacheItemExpiredCallbackCalled = true,
+			CacheItemExpired = (_, _) => globalCacheItemExpiredCallbackCalled = true,
 			CacheBackingStore = cache,
 		};
 

@@ -14,7 +14,7 @@ public class CacheEntityReferenceExtensionTests
 	public void WithAbsoluteExpirationExtension()
 	{
 		var expectedAbsoluteExpiration = DateTimeOffset.UtcNow;
-		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult<IAsyncDisposable>(null!), AsyncLazyFlags.None);
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
 
 		cacheEntityReference.WithAbsoluteExpiration(expectedAbsoluteExpiration);
@@ -28,7 +28,7 @@ public class CacheEntityReferenceExtensionTests
 	public void WithSlidingExpirationExtension()
 	{
 		var expectedSlidingExpirationWindow = TimeSpan.FromMinutes(1);
-		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult<IAsyncDisposable>(null!), AsyncLazyFlags.None);
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
 
 		cacheEntityReference.WithSlidingExpiration(expectedSlidingExpirationWindow);
@@ -43,7 +43,7 @@ public class CacheEntityReferenceExtensionTests
 	{
 		var expirationStrategy = Substitute.For<IExpirationStrategy>();
 
-		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult<IAsyncDisposable>(null!), AsyncLazyFlags.None);
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
 
 		cacheEntityReference.WithExpirationStrategy(expirationStrategy);
@@ -56,7 +56,7 @@ public class CacheEntityReferenceExtensionTests
 	{
 		var expirationCallback = (string _, IAsyncDisposable _) => { };
 
-		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult((IAsyncDisposable)null!), AsyncLazyFlags.None);
+		var cacheEntity = new CacheEntity<string, IAsyncDisposable>("test", () => Task.FromResult<IAsyncDisposable>(null!), AsyncLazyFlags.None);
 		var cacheEntityReference = new CacheEntityReference<string, IAsyncDisposable>(cacheEntity);
 
 		cacheEntityReference.WithExpirationCallback(expirationCallback);
