@@ -41,7 +41,7 @@ internal static class CacheItemFactoryInvoker
 				await Task.Delay(timeToWait, timeProvider).ConfigureAwait(false);
 			}
 
-			cacheItem.ObjectFactory.Start();
+			await cacheItem.ObjectFactory.ConfigureAwait(false);
 		},
 		(item, creationTimeProvider.GetExpectedCreationTime() - timeProvider.GetUtcNow(), timeProvider),
 		CancellationToken.None,
